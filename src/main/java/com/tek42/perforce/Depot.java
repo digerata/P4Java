@@ -5,6 +5,8 @@ import java.util.HashMap;
 import java.util.StringTokenizer;
 
 import com.tek42.perforce.nativ.P4Process;
+import com.tek42.perforce.model.*;
+import com.tek42.perforce.parse.*;
 
 /**
  * Represents the main object from which to interact with a Perforce server 
@@ -44,21 +46,55 @@ public class Depot {
 		settings.put("P4PASSWD", "");
 		settings.put("PATH", "C:\\Program Files\\Perforce");
 		settings.put("CLASSPATH", "/usr/share/java/p4.jar");
+		setSystemDrive("C:");
+		setSystemRoot("C:\\WINDOWS");
 		setExecutable("p4");
 		setServerTimeout(10000);
 		
 		String os = System.getProperty("os.name");
+		
 		if(null == os) {
 			return;
 		}
+		
 		if(os.startsWith("Windows")) {
 			settings.put("PATHEXT", ".COM;.EXE;.BAT;.CMD");
 			String windir = System.getProperty("com.ms.windir");
-			if(null != windir) {
+			if(windir != null) {
 				appendPath(windir.substring(0, 1) + "\\Program Files\\Perforce");
 				setSystemDrive(windir.substring(0, 1));
 				setSystemRoot(windir);
 			}
+		}
+	}
+	
+	public Changelist getChangelist(int number) throws PerforceException {
+		String id = new Integer(number).toString();
+		ChangelistBuilder builder = new ChangelistBuilder();
+		Changelist change = builder.build(getPerforceResponse(builder.getBuildCmd(id)));
+		
+		return change;
+	}
+	
+	protected StringBuilder getPerforceResponse(String cmd[]) throws PerforceException {
+		P4Process p = null;
+		try {
+			StringBuilder sb = new StringBuilder();
+			p = new P4Process(this);
+			p.exec(cmd);
+			String line;
+			while((line = p.readLine()) != null) {
+				sb.append(line);
+			}
+			return sb;
+		} catch(IOException ex) {
+			if(null != p) {
+				try {
+					p.close();
+				} catch(Exception ignex) { /* Ignored Exception */
+				}
+			}
+			throw new PerforceException(ex.getMessage());			
 		}
 	}
 	
@@ -72,7 +108,8 @@ public class Depot {
 	 * the failure.
 	 */
 	public void checkValidity() throws PerforceException {
-		String[] msg = { "Connect to server failed; check $P4PORT", "Perforce password (P4PASSWD) invalid or unset.",
+		String[] msg = { "Connect to server failed; check $P4PORT", 
+				"Perforce password (P4PASSWD) invalid or unset.",
 				"Can't create a new user - over license quota." };
 		int msgndx = -1, i, cnt = 0;
 
@@ -132,6 +169,7 @@ public class Depot {
 				int i = 0;
 				for(String key : settings.keySet()) {
 					envp[i++] = key + "=" + settings.get(key);
+					//System.out.println("envp[" + i + "] = " + key + "=" + settings.get(key));
 				}
 			}
 			validEnvp = true;

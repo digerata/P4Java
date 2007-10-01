@@ -46,8 +46,8 @@ public class DepotTest {
 	 * Test method for {@link com.tek42.perforce.Depot#getEnvp()}.
 	 */
 	@Test
-	public void testGetEnvp() {
-		fail("Not yet implemented");
+	public void testGetClient() {
+		//depot.getW();
 	}
 
 }

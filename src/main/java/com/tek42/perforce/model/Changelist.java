@@ -10,7 +10,7 @@ import java.util.List;
  * create one that is more complete.
  * <p>
  * This class maps the output of p4 describe [ChangeNumber].  However, it does not
- * contain the diffs ouput by that command.
+ * contain the diffs ouput by that command.  If you want those, get them yourself.
  * 
  * @author Mike Wille
  *
@@ -24,6 +24,23 @@ public class Changelist {
 	List<FileEntry> files;
 	List<JobEntry> jobs;
 	
+	public String toString() {
+		StringBuilder sb = new StringBuilder();
+		sb.append("Change " + changeNumber + "\n");
+		sb.append("by " + user + "@" + workspace + "\n");
+		sb.append("on " + date + "\n");
+		sb.append("Description: " + description + "\n");
+		sb.append("\n");
+		for(JobEntry job : jobs) {
+			sb.append(job + "\n");
+		}
+		sb.append("\n");
+		for(FileEntry file : files) {
+			sb.append(file + "\n");
+		}
+		
+		return sb.toString();
+	}
 	/**
 	 * Perforce has multiple files per change.  This class represents
 	 * a single file within a change which includes the action, filename, and revision.
@@ -36,6 +53,12 @@ public class Changelist {
 		Action action;
 		String filename;
 		String revision;
+		
+		public String toString() {
+			StringBuilder sb = new StringBuilder();
+			sb.append(action + " " + filename + " #" + revision);
+			return sb.toString();
+		}
 		
 		/**
 		 * @return the action
@@ -87,6 +110,12 @@ public class Changelist {
 		Status status;
 		String job;
 		String description;
+		
+		public String toString() {
+			StringBuilder sb = new StringBuilder();
+			sb.append(job + " " + status + " " + description);
+			return sb.toString();
+		}
 		/**
 		 * @return the status
 		 */
