@@ -3,6 +3,8 @@
  */
 package com.tek42.perforce.parse;
 
+import java.io.*;
+
 import com.tek42.perforce.*;
 
 /**
@@ -16,5 +18,5 @@ public interface Builder<T> {
 	public String[] getBuildCmd(String id);
 	public T build(StringBuilder sb) throws PerforceException;
 	public String[] getSaveCmd();
-	public void save(T obj) throws PerforceException;
+	public void save(T obj, Writer writer) throws PerforceException;
 }

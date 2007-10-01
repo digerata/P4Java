@@ -1,6 +1,6 @@
 package com.tek42.perforce.nativ;
 
-import java.io.BufferedReader;
+import java.io.*;
 import java.io.BufferedWriter;
 import java.io.IOException;
 import java.io.InputStream;
@@ -92,6 +92,9 @@ public class P4Process {
 	private long threshold = 10000; // The default is 10 seconds;
 
 	private boolean raw = false;
+	
+	private long sleepTime = 10;
+	private long closeWaitTime = 100;
 
 	/**
 	 * Constructor that specifies the source control environment.
@@ -226,6 +229,10 @@ public class P4Process {
 		OutputStreamWriter osw = new OutputStreamWriter(os);
 		logger.debug("P4Process.exec().osw: " + osw);
 		out = new BufferedWriter(osw);
+	}
+	
+	public Writer getWriter() {
+		return out;
 	}
 
 	/**
@@ -369,7 +376,7 @@ public class P4Process {
 				// Sleep for a second, so this thread can't become a CPU hog.
 				try {
 					logger.debug("P4Process: Sleeping...");
-					Thread.sleep(100); // Sleep for 1/10th of a second.
+					Thread.sleep(sleepTime); // Sleep for 1/10th of a second.
 				} catch(InterruptedException ie) {
 				}
 			}
@@ -441,7 +448,7 @@ public class P4Process {
 			} catch(InterruptedException ie) {
 			}
 			try {
-				Thread.sleep(1000);
+				Thread.sleep(closeWaitTime);
 			} catch(InterruptedException ie) {
 			}
 		}
@@ -464,4 +471,33 @@ public class P4Process {
 			P4_ERROR += message;
 		}
 	}
+
+	/**
+	 * @return the sleepTime
+	 */
+	public long getSleepTime() {
+		return sleepTime;
+	}
+
+	/**
+	 * @param sleepTime the sleepTime to set
+	 */
+	public void setSleepTime(long sleepTime) {
+		this.sleepTime = sleepTime;
+	}
+
+	/**
+	 * @return the closeWaitTime
+	 */
+	public long getCloseWaitTime() {
+		return closeWaitTime;
+	}
+
+	/**
+	 * @param closeWaitTime the closeWaitTime to set
+	 */
+	public void setCloseWaitTime(long closeWaitTime) {
+		this.closeWaitTime = closeWaitTime;
+	}
+	
 }

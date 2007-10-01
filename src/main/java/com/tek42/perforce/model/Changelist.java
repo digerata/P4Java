@@ -32,7 +32,7 @@ public class Changelist {
 	
 	public String toString() {
 		StringBuilder sb = new StringBuilder();
-		sb.append("Change " + changeNumber + "\n");
+		sb.append("[Change]: " + changeNumber + "\n");
 		sb.append("by " + user + "@" + workspace + "\n");
 		sb.append("on " + date + "\n");
 		sb.append("Description:\n" + description + "\n");
@@ -51,6 +51,7 @@ public class Changelist {
 		
 		return sb.toString();
 	}
+	
 	/**
 	 * Perforce has multiple files per change.  This class represents
 	 * a single file within a change which includes the action, filename, and revision.
@@ -59,7 +60,7 @@ public class Changelist {
 	 *
 	 */
 	public static class FileEntry {
-		public static enum Action { ADD, EDIT, DELETE, BRANCH };
+		public static enum Action { ADD, EDIT, DELETE, INTEGRATE };
 		Action action;
 		String filename;
 		String revision;

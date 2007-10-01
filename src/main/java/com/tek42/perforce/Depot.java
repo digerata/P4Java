@@ -1,8 +1,13 @@
 package com.tek42.perforce;
 
-import java.io.IOException;
+import java.io.*;
 import java.util.HashMap;
 import java.util.StringTokenizer;
+import java.util.List;
+import java.util.ArrayList;
+
+import org.apache.commons.digester.Digester;
+import org.xml.sax.SAXException;
 
 import com.tek42.perforce.nativ.P4Process;
 import com.tek42.perforce.model.*;
@@ -68,6 +73,54 @@ public class Depot {
 		}
 	}
 	
+	/**
+	 * Returns a workspace specified by name.
+	 *
+	 * @param name
+	 * @return
+	 * @throws PerforceException
+	 */
+	public Workspace getWorkspace(String name) throws PerforceException {
+		WorkspaceBuilder builder = new WorkspaceBuilder();
+		Workspace workspace = builder.build(getPerforceResponse(builder.getBuildCmd(name)));
+		if(workspace == null)
+			throw new PerforceException("Failed to retrieve workspace: " + name);
+		
+		return workspace;
+	}
+	
+	/**
+	 * Saves changes to an existing workspace, or creates a new one.
+	 *
+	 * @param workspace
+	 * @throws PerforceException
+	 */
+	public void saveWorkspace(Workspace workspace) throws PerforceException {
+		WorkspaceBuilder builder = new WorkspaceBuilder();
+		P4Process p = null;
+		try {
+			p = new P4Process(this);
+			p.exec(builder.getSaveCmd());
+			//builder.save(workspace, p.getWriter());
+			FilterWriter writer = new FilterWriter(p.getWriter()) {
+				public void write(String data) {
+					System.out.print("Debug: " + data);
+				}
+			};
+			builder.save(workspace, writer);
+			p.close();
+		} catch(IOException e) {
+			throw new PerforceException("Failed to open connection to perforce", e);
+		}
+	}
+	
+	/**
+	 * Returns a single changelist specified by its number.
+	 *
+	 * @param number
+	 * @return
+	 * @throws PerforceException
+	 */
 	public Changelist getChangelist(int number) throws PerforceException {
 		String id = new Integer(number).toString();
 		ChangelistBuilder builder = new ChangelistBuilder();
@@ -77,6 +130,65 @@ public class Depot {
 		return change;
 	}
 	
+	/**
+	 * Returns a list of changelists that match the parameters
+	 *
+	 * @param path			What point in the depot to show changes for?
+	 * @param lastChange
+	 * @param limit
+	 * @return
+	 * @throws PerforceException
+	 */
+	public List<Changelist> getChangelists(String path, int lastChange, int limit) throws PerforceException {
+		if(limit < 1)
+			limit = 100;
+		if(path == null || path.equals(""))
+			path = "//...";
+		if(lastChange >= 0)
+			path += "@" + lastChange; 
+	
+		String cmd[] = {"p4", "changes", "-m", new Integer(limit).toString(), path }; 
+		
+		StringBuilder response = getPerforceResponse(cmd);
+		
+		List<String> ids = parseList(response, 1);
+		
+		List<Changelist> changes = new ArrayList<Changelist>();
+		for(String id : ids) {
+			changes.add(getChangelist(new Integer(id)));
+		}
+		return changes;
+	}
+	
+	/**
+	 * Parses lines of formatted text for a list of values.  Tokenizes each line into columns
+	 * and adds the column specified by index to the list.
+	 *
+	 * @param response
+	 * @param index
+	 * @return
+	 */
+	protected List<String> parseList(StringBuilder response, int index) {
+		StringTokenizer lines = new StringTokenizer(response.toString(), "\n\r");
+		List<String> list = new ArrayList<String>(100);
+		while(lines.hasMoreElements()) {
+			StringTokenizer columns = new StringTokenizer(lines.nextToken());
+			for(int column = 0; column < index; column++) {
+				columns.nextToken();
+			}
+			list.add(columns.nextToken());
+		}
+		return list;
+		
+	}
+	
+	/**
+	 * Executes a perforce command and returns the output as a StringBuilder.
+	 *
+	 * @param cmd
+	 * @return
+	 * @throws PerforceException
+	 */
 	protected StringBuilder getPerforceResponse(String cmd[]) throws PerforceException {
 		P4Process p = null;
 		try {

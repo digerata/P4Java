@@ -1,5 +1,6 @@
 package com.tek42.perforce.parse;
 
+import java.io.*;
 import java.util.*;
 
 import org.slf4j.Logger;
@@ -7,6 +8,7 @@ import org.slf4j.LoggerFactory;
 
 import com.tek42.perforce.PerforceException;
 import com.tek42.perforce.model.Changelist;
+
 /**
  * Builder for changelists
  * 
@@ -143,9 +145,7 @@ public class ChangelistBuilder implements Builder<Changelist> {
 	/* (non-Javadoc)
 	 * @see com.tek42.perforce.parse.Builder#save(java.lang.Object)
 	 */
-	public void save(Changelist obj) throws PerforceException {
-		// TODO Auto-generated method stub
-
+	public void save(Changelist obj, Writer out) throws PerforceException {
+		throw new UnsupportedOperationException("This is not implemented yet."); 
 	}
-
 }
