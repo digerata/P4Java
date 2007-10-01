@@ -9,10 +9,9 @@ import java.io.OutputStream;
 import java.io.OutputStreamWriter;
 import java.util.Date;
 
-/*
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-*/
+
 import com.tek42.perforce.*;
 
 /*
@@ -84,7 +83,7 @@ public class P4Process {
 
 	private int exit_code = 0;
 
-	//private final Logger logger = LoggerFactory.getLogger("perforce");
+	private final Logger logger = LoggerFactory.getLogger("perforce");
 
 	private String P4_ERROR = null;
 
@@ -176,21 +175,13 @@ public class P4Process {
 				new_cmd[j] = cmd[(j - i) + 1];
 			}
 		}
-		//logger.info("P4Process.exec: ", new_cmd);
-		//System.out.println("P4Process.exec: " + new_cmd);
-		/*
-		System.out.print("P4Process.exec: ");
-		for(String v : new_cmd) {
-			System.out.print(v + " ");
-		}
-		System.out.println();
-		*/
+		logger.info("P4Process.exec: ", new_cmd);
 		if(P4JNI.isValid()) {
-			System.out.println("Using native library");
+			logger.debug("Using native library");
 			native_exec(new_cmd);
 			using_native = true;
 		} else {
-			System.out.println("Using java library");
+			logger.debug("Using java library");
 			pure_exec(new_cmd);
 			using_native = false;
 		}
@@ -220,20 +211,20 @@ public class P4Process {
 		cmd[0] = depot.getExecutable();
 		p = rt.exec(cmd, depot.getEnvp());
 		InputStream is = p.getInputStream();
-		//logger.debug("P4Process.exec().is: " + is);
+		logger.debug("P4Process.exec().is: " + is);
 		InputStreamReader isr = new InputStreamReader(is);
-		//logger.debug("P4Process.exec().isr: " + isr);
+		logger.debug("P4Process.exec().isr: " + isr);
 		in = new BufferedReader(isr);
 		InputStream es = p.getErrorStream();
-		//logger.debug("P4Process.exec().es: " + es);
+		logger.debug("P4Process.exec().es: " + es);
 		InputStreamReader esr = new InputStreamReader(es);
-		//logger.debug("P4Process.exec().esr: " + esr);
+		logger.debug("P4Process.exec().esr: " + esr);
 		err = new BufferedReader(esr);
 
 		OutputStream os = p.getOutputStream();
-		//logger.debug("P4Process.exec().os: " + os);
+		logger.debug("P4Process.exec().os: " + os);
 		OutputStreamWriter osw = new OutputStreamWriter(os);
-		//logger.debug("P4Process.exec().osw: " + osw);
+		logger.debug("P4Process.exec().osw: " + osw);
 		out = new BufferedWriter(osw);
 	}
 
@@ -300,18 +291,17 @@ public class P4Process {
 
 		if(null == p || null == in || null == err)
 			return null;
-		// Debug.verbose("P4Process.readLine()");
+		logger.debug("P4Process.readLine()");
 		try {
 			for(;;) {
 				if(null == p || null == in || null == err) {
-					//logger.error("P4Process.readLine(): Something went null");
-					System.out.println("P4Process.readline(): Something went null");
+					logger.error("P4Process.readLine(): Something went null");
 					return null;
 				}
 
 				current = (new Date()).getTime();
 				if(current >= timeout) {
-					//logger.error("P4Process.readLine(): Timeout");
+					logger.error("P4Process.readLine(): Timeout");
 					System.out.println("P4Process.readLine(): timeout");
 					// If this was generating a new object from stdin, return an
 					// empty string. Otherwise, return null.
@@ -322,7 +312,7 @@ public class P4Process {
 					return null;
 				}
 
-				// Debug.verbose("P4Process.readLine().in: "+in);
+				logger.debug("P4Process.readLine().in: "+in);
 				try {
 					/**
 					 * If there's something coming in from stdin, return it. We
@@ -341,12 +331,11 @@ public class P4Process {
 
 					if(in.ready()) {
 						line = in.readLine();
-						//logger.debug("From P4:" + line);
+						logger.debug("From P4:" + line);
 						if(line.startsWith("error")) {
 							if(!line.trim().equals("") && (-1 == line.indexOf("up-to-date"))
 									&& (-1 == line.indexOf("no file(s) to resolve"))) {
 								addP4Error(line);
-								//System.out.println("error: " +line);
 							}
 						} else if(line.startsWith("warning")) {
 						} else if(line.startsWith("text")) {
@@ -355,16 +344,16 @@ public class P4Process {
 							int exit_code = new Integer(line.substring(line.indexOf(" ") + 1, line.length()))
 									.intValue();
 							if(0 == exit_code) {
-								//logger.debug("P4 Exec Complete.");
+								logger.debug("P4 Exec Complete.");
 							} else {
-								//logger.error("P4 exited with an Error!");
+								logger.error("P4 exited with an Error!");
 								System.out.println("P4 exited with an error!");
 							}
 							return null;
 						}
 						if(!raw)
 							line = line.substring(line.indexOf(":") + 1).trim();
-						//logger.debug("P4Process.readLine(): " + line);
+						logger.debug("P4Process.readLine(): " + line);
 						return line;
 					}
 				} catch(NullPointerException ne) {
@@ -375,13 +364,11 @@ public class P4Process {
 					exit_code = p.exitValue();
 					return null;
 				} catch(IllegalThreadStateException ie) {
-					//logger.debug("P4Process: Thread is not done yet.");
-					//System.out.println("P4Process: thread is not done yet.");
+					logger.debug("P4Process: Thread is not done yet.");
 				}
 				// Sleep for a second, so this thread can't become a CPU hog.
 				try {
-					//logger.debug("P4Process: Sleeping...");
-					//System.out.println("P4Process: Sleeping...");
+					logger.debug("P4Process: Sleeping...");
 					Thread.sleep(100); // Sleep for 1/10th of a second.
 				} catch(InterruptedException ie) {
 				}

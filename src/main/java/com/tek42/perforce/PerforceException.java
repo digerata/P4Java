@@ -32,7 +32,11 @@ package com.tek42.perforce;
 public class PerforceException extends Exception {
 	private static final long serialVersionUID = 1L;
 
-	public PerforceException(String msg) {
-		super(msg);
+	public PerforceException(String mesg) {
+		super(mesg);
+	}
+	
+	public PerforceException(String mesg, Throwable cause) {
+		super(mesg, cause);
 	}
 }

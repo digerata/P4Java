@@ -72,7 +72,8 @@ public class Depot {
 		String id = new Integer(number).toString();
 		ChangelistBuilder builder = new ChangelistBuilder();
 		Changelist change = builder.build(getPerforceResponse(builder.getBuildCmd(id)));
-		
+		if(change == null)
+			throw new PerforceException("Failed to retrieve changelist " + number);
 		return change;
 	}
 	
@@ -84,7 +85,7 @@ public class Depot {
 			p.exec(cmd);
 			String line;
 			while((line = p.readLine()) != null) {
-				sb.append(line);
+				sb.append(line + "\n");
 			}
 			return sb;
 		} catch(IOException ex) {

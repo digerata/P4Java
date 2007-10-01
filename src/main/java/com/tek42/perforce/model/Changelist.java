@@ -1,6 +1,7 @@
 package com.tek42.perforce.model;
 
 import java.util.List;
+import java.util.ArrayList;
 
 /**
  * Represents a changelist in Perforce.
@@ -24,19 +25,28 @@ public class Changelist {
 	List<FileEntry> files;
 	List<JobEntry> jobs;
 	
+	public Changelist() {
+		files = new ArrayList<FileEntry>(0);
+		jobs = new ArrayList<JobEntry>(0);
+	}
+	
 	public String toString() {
 		StringBuilder sb = new StringBuilder();
 		sb.append("Change " + changeNumber + "\n");
 		sb.append("by " + user + "@" + workspace + "\n");
 		sb.append("on " + date + "\n");
-		sb.append("Description: " + description + "\n");
-		sb.append("\n");
-		for(JobEntry job : jobs) {
-			sb.append(job + "\n");
+		sb.append("Description:\n" + description + "\n");
+		if(jobs.size() > 0) {
+			sb.append("Jobs: \n");
+			for(JobEntry job : jobs) {
+				sb.append(job + "\n");
+			}
 		}
-		sb.append("\n");
-		for(FileEntry file : files) {
-			sb.append(file + "\n");
+		if(files.size() > 0) {
+			sb.append("Files: \n");
+			for(FileEntry file : files) {
+				sb.append(file + "\n");
+			}
 		}
 		
 		return sb.toString();
@@ -49,14 +59,14 @@ public class Changelist {
 	 *
 	 */
 	public static class FileEntry {
-		public static enum Action { ADD, CHANGE, DELETE, BRANCH };
+		public static enum Action { ADD, EDIT, DELETE, BRANCH };
 		Action action;
 		String filename;
 		String revision;
 		
 		public String toString() {
 			StringBuilder sb = new StringBuilder();
-			sb.append(action + " " + filename + " #" + revision);
+			sb.append(action + " '" + filename + "' #" + revision + ".");
 			return sb.toString();
 		}
 		
@@ -106,8 +116,7 @@ public class Changelist {
 	 *
 	 */
 	public static class JobEntry {
-		public static enum Status { OPEN, CLOSED };
-		Status status;
+		String status;
 		String job;
 		String description;
 		
@@ -119,13 +128,13 @@ public class Changelist {
 		/**
 		 * @return the status
 		 */
-		public Status getStatus() {
+		public String getStatus() {
 			return status;
 		}
 		/**
 		 * @param status the status to set
 		 */
-		public void setStatus(Status status) {
+		public void setStatus(String status) {
 			this.status = status;
 		}
 		/**
