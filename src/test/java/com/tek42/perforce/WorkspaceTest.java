@@ -3,6 +3,7 @@ package com.tek42.perforce;
 import java.util.*;
 import com.tek42.perforce.*;
 import com.tek42.perforce.model.*;
+import com.perforce.api.*;
 
 import static org.junit.Assert.*;
 
@@ -33,7 +34,7 @@ public class WorkspaceTest {
 	 */
 	@Test
 	public void testGetWorkspace() throws Exception {
-		Workspace workspace = depot.getWorkspace("mike-work");
+		Workspace workspace = depot.getWorkspace("test-workspace");
 		System.out.println("Have workspace: \n" + workspace);
 	}
 	
@@ -51,12 +52,22 @@ public class WorkspaceTest {
 		System.out.println("\n\nMade Changes:\n\n" + workspace);
 		
 		depot.saveWorkspace(workspace);
-		
+		/*
 		workspace = depot.getWorkspace("test-workspace");
 		assertNotNull(workspace);
 		assertEquals("c:/my/test/folder", workspace.getRoot());
 		assertEquals("//depot/Test/... //test-workspace/...", workspace.getViewsAsString());
 		assertEquals(desc, workspace.getDescription());
+		*/
+	}
+	
+	@Test
+	public void testLegacyUpdateWorkspace() throws Exception {
+		Client client = Client.getClient(depot.getPerforceEnv(), "test-workspace");
+		client.setDescription("Modified via perforce legacy API.");
+		client.setRoot("c:/legacy/perforce/api");
+		
+		client.commit();
 	}
 	
 	//@Test

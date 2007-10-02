@@ -71,7 +71,7 @@ public class P4Process {
 
 	private BufferedReader in, err;
 
-	private BufferedWriter out;
+	private Writer out;
 
 	private int exit_code = 0;
 
@@ -284,7 +284,13 @@ public class P4Process {
 		Debug.verbose("P4Process.exec().os: " + os);
 		OutputStreamWriter osw = new OutputStreamWriter(os);
 		Debug.verbose("P4Process.exec().osw: " + osw);
-		out = new BufferedWriter(osw);
+		out = new FilterWriter(new BufferedWriter(osw)) {
+			public void write(String str) throws IOException {
+				super.write(str);
+				System.out.print("P4DebugOutput: " + str);
+			}
+			
+		};
 	}
 
 	/**
@@ -333,8 +339,7 @@ public class P4Process {
 	 *            Line to be written.
 	 */
 	public synchronized void println(String line) throws IOException {
-		out.write(line);
-		out.newLine();
+		out.write(line + "\n");
 	}
 
 	/**

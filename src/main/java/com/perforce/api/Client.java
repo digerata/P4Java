@@ -303,6 +303,7 @@ public final class Client extends Mapping {
 			p.println("Client: " + getName());
 			p.println("Owner: " + getOwner());
 			p.println("Root: " + getRoot());
+			p.println("Description: " + getDescription());
 			p.println("View:");
 			p.println(getView());
 			p.flush();

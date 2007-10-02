@@ -171,7 +171,7 @@ public class Workspace {
 	public String getViewsAsString() {
 		StringBuilder sb = new StringBuilder();
 		for(String view : views) {
-			sb.append("\t" + view + "\n");
+			sb.append(view + "\n");
 		}
 		return sb.toString();
 	}

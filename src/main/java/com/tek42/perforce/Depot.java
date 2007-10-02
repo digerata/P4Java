@@ -6,9 +6,7 @@ import java.util.StringTokenizer;
 import java.util.List;
 import java.util.ArrayList;
 
-import org.apache.commons.digester.Digester;
-import org.xml.sax.SAXException;
-
+import com.perforce.api.*;
 import com.tek42.perforce.nativ.P4Process;
 import com.tek42.perforce.model.*;
 import com.tek42.perforce.parse.*;
@@ -74,6 +72,23 @@ public class Depot {
 	}
 	
 	/**
+	 * Obtain a legacy perforce Env object for using legacy API.
+	 * @return
+	 */
+	public Env getPerforceEnv() {
+		Env env = new Env();
+		env.setClient(getClient());
+		env.setExecutable(getExecutable());
+		env.setPassword(getPassword());
+		env.setUser(getUser());
+		env.setPort(getPort());
+		env.setSystemDrive(getSystemDrive());
+		env.setSystemRoot(getSystemRoot());
+		
+		return env;
+	}
+	
+	/**
 	 * Returns a workspace specified by name.
 	 *
 	 * @param name
@@ -104,10 +119,17 @@ public class Depot {
 			//builder.save(workspace, p.getWriter());
 			FilterWriter writer = new FilterWriter(p.getWriter()) {
 				public void write(String data) {
-					System.out.print("Debug: " + data);
+					System.out.print("P4JavaDebugOutput: " + data);
 				}
 			};
 			builder.save(workspace, writer);
+			p.flush();
+			String line;
+			int cnt = 0;
+			while(null != (line = p.readLine())) {
+				if(0 == cnt++)
+					continue;
+			}
 			p.close();
 		} catch(IOException e) {
 			throw new PerforceException("Failed to open connection to perforce", e);
@@ -451,6 +473,10 @@ public class Depot {
 		settings.put("SystemDrive", drive);
 		validEnvp = false;
 	}
+	
+	public String getSystemDrive() {
+		return settings.get("SystemDrive");
+	}
 
 	/**
 	 * Sets the SystemRoot in the class information. This is only meaningful
@@ -466,6 +492,10 @@ public class Depot {
 		validEnvp = false;
 	}
 
+	public String getSystemRoot() {
+		return settings.get("SystemRoot");
+	}
+	
 	/**
 	 * Sets up the path to reach the p4 executable. The full path passed in must
 	 * contain the executable or at least end in the system's file separator

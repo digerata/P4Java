@@ -93,15 +93,16 @@ public class WorkspaceBuilder implements Builder<Workspace> {
 	public void save(Workspace workspace, Writer out) throws PerforceException {
 		try {
 			out.write("Client: " + workspace.getName() + "\n");
-			out.write("Owner: " + workspace.getOwner() + "\n");
-			out.write("Host: " + workspace.getHost() + "\n");
-			out.write("Description:\n");
-			out.write("\t" + workspace.getDescription() + "\n");
+			if(!workspace.getOwner().equals(""))
+				out.write("Owner: " + workspace.getOwner() + "\n");
+			if(!workspace.getHost().equals(""))
+				out.write("Host: " + workspace.getHost() + "\n");
+			out.write("Description: " + workspace.getDescription() + "\n");
 			out.write("Root: " + workspace.getRoot() + "\n");
 			out.write("Options: " + workspace.getOptions() + "\n");
 			out.write("LineEnd: " + workspace.getLineEnd() + "\n");
 			out.write("View:\n");
-			out.write(workspace.getViewsAsString() + "\n");
+			out.write(" " + workspace.getViewsAsString());
 			if(!workspace.getAltRoots().equals(""))
 				out.write("AltRoots: " + workspace.getAltRoots() + "\n");
 			if(!workspace.getSubmitOptions().equals(""))
