@@ -60,7 +60,7 @@ public class Changelist {
 	 *
 	 */
 	public static class FileEntry {
-		public static enum Action { ADD, EDIT, DELETE, INTEGRATE };
+		public static enum Action { ADD, EDIT, DELETE, INTEGRATE, BRANCH };
 		Action action;
 		String filename;
 		String revision;

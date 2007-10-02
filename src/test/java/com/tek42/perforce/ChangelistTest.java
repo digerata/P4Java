@@ -25,7 +25,7 @@ public class ChangelistTest {
 	public void setUp() throws Exception {
 		depot = new Depot();
 		depot.setUser("mwille");
-		depot.setPassword("phatpimp");
+		depot.setPassword("");
 		depot.setPort("codemaster.atdoner.com:1666");
 	}
 	
@@ -43,10 +43,27 @@ public class ChangelistTest {
 	 */
 	@Test
 	public void testGetChangelists() throws Exception {
-		List<Changelist> changes = depot.getChangelists("//depot/Extranet...", -1, 5);
+		List<Changelist> changes = depot.getChangelists("//depot/Extranet/...", -1, 5);
+		assertNotNull(changes);
+		assertTrue(changes.size() > 0);
+		
 		for(Changelist change: changes) {
 			System.out.println(change);
 		}
 	}
+	
+	@Test
+	public void testGetAllChangelists() throws Exception {
+		List<Changelist> changes = depot.getChangelists("//depot/c-lib/...", 0, -1);
+		assertNotNull(changes);
+		assertTrue(changes.size() > 0);
+	}
 
+	public void testGetLastestChange() throws Exception {
+		List<Changelist> changes = depot.getChangelists("//depot/Commons/...", 8813, 1);
+		assertNotNull(changes);
+		assertEquals(1, changes.size());
+		assertEquals(8881, changes.get(0).getChangeNumber());
+		//assertTrue(changes.size() > 0);
+	}
 }

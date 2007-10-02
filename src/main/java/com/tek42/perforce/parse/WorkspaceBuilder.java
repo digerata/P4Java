@@ -1,7 +1,7 @@
 package com.tek42.perforce.parse;
 
 import java.io.*;
-import java.util.StringTokenizer;
+import java.util.*;
 
 import com.tek42.perforce.model.*;
 import com.tek42.perforce.PerforceException;
@@ -11,65 +11,28 @@ import com.tek42.perforce.PerforceException;
  * @author mwille
  *
  */
-public class WorkspaceBuilder implements Builder<Workspace> {
-
+public class WorkspaceBuilder extends AbstractFormBuilder<Workspace> {
 	/* (non-Javadoc)
 	 * @see com.tek42.perforce.parse.Builder#build(java.lang.StringBuilder)
 	 */
-	public Workspace build(StringBuilder sb) throws PerforceException {
-		// Note: we particularly do NOT want tabs or spaces in our tokenizer.  Including tabs would
-		// screw up how we read the description.
-		StringTokenizer lines = new StringTokenizer(sb.toString(), "\n\r");
+	public Workspace buildForm(Map<String, String> fields) throws PerforceException {
 		Workspace workspace = new Workspace();
-		while(lines.hasMoreTokens()) {
-			String line = lines.nextToken();
-			
-			if(line.startsWith("#")) {
-				continue;
-			}
-			
-			if(line.startsWith("Client:")) {
-				workspace.setName(line.substring(8).trim());
-
-			} else if(line.startsWith("Owner:")) {
-				workspace.setOwner(line.substring(7).trim());
-
-			} else if(line.startsWith("Host:")) {
-				workspace.setOwner(line.substring(6).trim());
-
-			} else if(line.startsWith("Root:")) {
-				workspace.setRoot(line.substring(6).trim());
-
-			} else if(line.startsWith("Options:")) {
-				workspace.setOptions(line.substring(9).trim());
-
-			} else if(line.startsWith("SubmitOptions:")) {
-				workspace.setSubmitOptions(line.substring(15).trim());
-
-			} else if(line.startsWith("LineEnd:")) {
-				workspace.setLineEnd(line.substring(9).trim());
-
-			} else if(line.startsWith("AltRoots:")) {
-				workspace.setAltRoots(line.substring(10).trim());
-
-			} else if(line.startsWith("Description:")) {
-				line = lines.nextToken();
-				String desc = line.trim();
-				while(line.startsWith("\\t") && lines.hasMoreElements() && !lines.equals("")) {
-					desc += "\n" + line.trim(); // trim will get rid of the tab for us
-					line = lines.nextToken();
-				}
-				workspace.setDescription(desc);
-				
-			} else if(line.startsWith("View:")) {
-				line = lines.nextToken();
-				while((line.startsWith("\t") || line.startsWith(" ") || line.startsWith("//")) && lines.hasMoreTokens()) {
-					workspace.addView(line);
-					line = lines.nextToken();
-				}
-			}
+		workspace.setName(getField("Client", fields));
+		workspace.setOwner(getField("Owner", fields));
+		workspace.setHost(getField("Host", fields));
+		workspace.setRoot(getField("Root", fields));
+		workspace.setOptions(getField("Options", fields));
+		workspace.setSubmitOptions(getField("SubmitOptions", fields));
+		workspace.setLineEnd(getField("LineEnd", fields));
+		workspace.setAltRoots(getField("AltRoots", fields));
+		workspace.setDescription(getField("Description", fields));
+		workspace.setUpdate(getField("Update", fields));
+		workspace.setAccess(getField("Access", fields));
+		
+		for(String line : getField("View", fields).split("\\n")) {
+			workspace.addView(line);
 		}
-
+		
 		return workspace;
 	}
 
@@ -84,7 +47,7 @@ public class WorkspaceBuilder implements Builder<Workspace> {
 	 * @see com.tek42.perforce.parse.Builder#getSaveCmd()
 	 */
 	public String[] getSaveCmd() {
-		return new String[] { "p4", "workspace", "-i" };
+		return new String[] { "p4", "-s", "client", "-i" };
 	}
 
 	/* (non-Javadoc)
@@ -99,15 +62,19 @@ public class WorkspaceBuilder implements Builder<Workspace> {
 				out.write("Host: " + workspace.getHost() + "\n");
 			out.write("Description: " + workspace.getDescription() + "\n");
 			out.write("Root: " + workspace.getRoot() + "\n");
-			out.write("Options: " + workspace.getOptions() + "\n");
-			out.write("LineEnd: " + workspace.getLineEnd() + "\n");
-			out.write("View:\n");
-			out.write(" " + workspace.getViewsAsString());
+			
 			if(!workspace.getAltRoots().equals(""))
 				out.write("AltRoots: " + workspace.getAltRoots() + "\n");
+			
+			out.write("Options: " + workspace.getOptions() + "\n");
+			
 			if(!workspace.getSubmitOptions().equals(""))
 				out.write("SubmitOptions: " + workspace.getSubmitOptions() + "\n");
-			out.flush();
+			
+			out.write("LineEnd: " + workspace.getLineEnd() + "\n");
+			out.write("View:\n");
+			out.write(" " + workspace.getViewsAsString() + "\n");
+			
 		} catch(IOException e) {
 			throw new PerforceException("Failed to save workspace", e);
 		}

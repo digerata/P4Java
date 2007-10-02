@@ -22,7 +22,7 @@ public class DepotTest {
 	public void setUp() throws Exception {
 		depot = new Depot();
 		depot.setUser("mwille");
-		depot.setPassword("phatpimp");
+		depot.setPassword("");
 		depot.setPort("codemaster.atdoner.com:1666");
 	}
 

@@ -22,8 +22,10 @@ public class Workspace {
 	String options;
 	String lineEnd;
 	String submitOptions;
+	String update;
+	String access;
 	List<String> views;
-
+	
 	public Workspace() {
 		this.name = "";
 		this.owner = "";
@@ -35,18 +37,23 @@ public class Workspace {
 		this.views = new ArrayList<String>(1);
 		this.lineEnd = "";
 		this.submitOptions = "";
+		this.update = "";
+		this.access = "";
 	}
 	
 	public String toString() {
 		StringBuilder sb = new StringBuilder();
 		sb.append("[Client]\n");
 		sb.append("Name: " + getName() + "\n");
+		sb.append("Update: " + getUpdate() + "\n");
+		sb.append("Access: " + getAccess() + "\n");
 		sb.append("Owner: " + getOwner() + "\n");
 		sb.append("Host: " + getHost() + "\n");
 		sb.append("Description: " + getDescription() + "\n");
 		sb.append("Root: " + getRoot() + "\n");
 		sb.append("AltRoot: " + getAltRoots() + "\n");
 		sb.append("Options: " + getOptions() + "\n");
+		sb.append("SubmitOptions: " + getSubmitOptions() + "\n");
 		sb.append("LineEnd: " + getLineEnd() + "\n");
 		sb.append("Views: \n");
 		for(String view : views) {
@@ -219,4 +226,32 @@ public class Workspace {
 		this.submitOptions = submitOptions;
 	}
 
+	/**
+	 * @return the update
+	 */
+	public String getUpdate() {
+		return update;
+	}
+
+	/**
+	 * @param update the update to set
+	 */
+	public void setUpdate(String update) {
+		this.update = update;
+	}
+
+	/**
+	 * @return the access
+	 */
+	public String getAccess() {
+		return access;
+	}
+
+	/**
+	 * @param access the access to set
+	 */
+	public void setAccess(String access) {
+		this.access = access;
+	}
+	
 }

@@ -6,10 +6,13 @@ import java.util.StringTokenizer;
 import java.util.List;
 import java.util.ArrayList;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import com.perforce.api.*;
-import com.tek42.perforce.nativ.P4Process;
 import com.tek42.perforce.model.*;
 import com.tek42.perforce.parse.*;
+import com.tek42.perforce.process.*;
 
 /**
  * Represents the main object from which to interact with a Perforce server 
@@ -19,14 +22,15 @@ import com.tek42.perforce.parse.*;
  */
 public class Depot {
 	private static Depot depot;
-	
+	private final Logger logger = LoggerFactory.getLogger("perforce");
 	private HashMap<String, String> settings;
 	private String pathSep;
 	private String fileSep;
-	private String[] envp;
 	private boolean validEnvp;
 	private String p4exe;
 	private long threshold;
+	
+	ExecutorFactory execFactory;
 	
 	/**
 	 * If not using this in a Dependancy Injection environment, use this method to get ahold of the depot.
@@ -42,6 +46,10 @@ public class Depot {
 	}
 	
 	public Depot() {
+		this(new DefaultExecutorFactory());
+	}
+	
+	public Depot(ExecutorFactory factory) {
 		settings = new HashMap<String, String>();
 		settings.put("P4USER", "robot");
 		settings.put("P4CLIENT", "robot-client");
@@ -69,11 +77,29 @@ public class Depot {
 				setSystemRoot(windir);
 			}
 		}
+		execFactory = factory;
+		execFactory.setEnv(settings);		
 	}
 	
 	/**
-	 * Obtain a legacy perforce Env object for using legacy API.
+	 * Ensures that the latest settings are reflected in the ExecutorFactory before
+	 * it is used.
+	 *
 	 * @return
+	 */
+	public ExecutorFactory getExecFactory() {
+		if(!validEnvp) {
+			execFactory.setEnv(settings);
+		}
+		return execFactory;
+	}
+	
+	/**
+	 * Obtain a legacy perforce Env object for using legacy API.  Useful if you
+	 * need to leverage a feature not present in com.tek42.perforce but one that does exist
+	 * in com.perforce.api.
+	 * 
+	 * @return {@link com.perforce.api.Env} object
 	 */
 	public Env getPerforceEnv() {
 		Env env = new Env();
@@ -112,28 +138,11 @@ public class Depot {
 	 */
 	public void saveWorkspace(Workspace workspace) throws PerforceException {
 		WorkspaceBuilder builder = new WorkspaceBuilder();
-		P4Process p = null;
-		try {
-			p = new P4Process(this);
-			p.exec(builder.getSaveCmd());
-			//builder.save(workspace, p.getWriter());
-			FilterWriter writer = new FilterWriter(p.getWriter()) {
-				public void write(String data) {
-					System.out.print("P4JavaDebugOutput: " + data);
-				}
-			};
-			builder.save(workspace, writer);
-			p.flush();
-			String line;
-			int cnt = 0;
-			while(null != (line = p.readLine())) {
-				if(0 == cnt++)
-					continue;
-			}
-			p.close();
-		} catch(IOException e) {
-			throw new PerforceException("Failed to open connection to perforce", e);
-		}
+		saveToPerforce(workspace, builder);
+	}
+	
+	public StringBuilder syncToHead(String path) throws PerforceException {
+		return getPerforceResponse(new String[] { "p4", "sync", path });
 	}
 	
 	/**
@@ -156,23 +165,26 @@ public class Depot {
 	 * Returns a list of changelists that match the parameters
 	 *
 	 * @param path			What point in the depot to show changes for?
-	 * @param lastChange
-	 * @param limit
+	 * @param lastChange	The last changelist number to start from
+	 * @param limit			The maximum changes to return
+	 * 						if less than 1, will return everything
 	 * @return
 	 * @throws PerforceException
 	 */
 	public List<Changelist> getChangelists(String path, int lastChange, int limit) throws PerforceException {
-		if(limit < 1)
-			limit = 100;
 		if(path == null || path.equals(""))
 			path = "//...";
-		if(lastChange >= 0)
+		if(lastChange > 0)
 			path += "@" + lastChange; 
 	
-		String cmd[] = {"p4", "changes", "-m", new Integer(limit).toString(), path }; 
+		String cmd[];
+		
+		if(limit > 0)
+			cmd = new String[] {"p4", "changes", "-m", new Integer(limit).toString(), path };
+		else
+			cmd = new String[] {"p4", "changes", path };
 		
 		StringBuilder response = getPerforceResponse(cmd);
-		
 		List<String> ids = parseList(response, 1);
 		
 		List<Changelist> changes = new ArrayList<Changelist>();
@@ -205,6 +217,84 @@ public class Depot {
 	}
 	
 	/**
+	 * Handles the IO for opening a process, writing to it, flushing, closing, and then handling
+	 * any errors.
+	 *
+	 * @param object
+	 * @param builder
+	 * @throws PerforceException
+	 */
+	@SuppressWarnings("unchecked")
+	protected void saveToPerforce(Object object, Builder builder) throws PerforceException {
+		Executor p4 = getExecFactory().newExecutor();
+		try {
+			// for exception reporting...
+			String cmds[] = builder.getSaveCmd();
+			String cmd = "";
+			for(String cm : cmds) {
+				cmd += cm + " ";
+			}
+			// back to our regularly scheduled programming...
+			p4.exec(builder.getSaveCmd());
+			BufferedReader reader = p4.getReader();
+			
+			BufferedWriter writer = p4.getWriter();
+			final StringBuilder log = new StringBuilder();
+			Writer fwriter = new FilterWriter(writer) {
+				public void write(String str) throws IOException {
+					log.append(str);
+					out.write(str);
+				}
+			};
+			builder.save(object, fwriter);
+			fwriter.flush();
+			fwriter.close();
+			/*
+			BufferedWriter writer = p4.getWriter();
+			builder.save(object, writer);
+			writer.flush();
+			writer.close();
+			*/
+			String line;
+			String error = "";
+			String info = "";
+			int exitCode = 0;
+			while((line = reader.readLine()) != null) {
+				logger.debug("LineIn -> " + line);
+				if(line.startsWith("error")) {
+					if(!line.trim().equals("") 
+							&& (line.indexOf("up-to-date") < 0)
+							&& (line.indexOf("no file(s) to resolve") < 0)) {
+						error += line.substring(6);
+					}
+				
+				} else if(line.startsWith("exit")){
+					exitCode = new Integer(line.substring(line.indexOf(" ") + 1, line.length())).intValue();
+					
+				} else {
+					if(line.indexOf(":") > -1)
+						info += line.substring(line.indexOf(":"));
+					else
+						info += line;
+				}
+			}
+			reader.close();
+			
+			if(exitCode != 0) {
+				if(!error.equals(""))
+					throw new PerforceException(error + "\nFor Command: " + cmd + "\nWith Data:\n===================\n" + log.toString() + "===================\n");
+				throw new PerforceException(info); 
+			}
+			
+			logger.info(info);
+		
+		} catch(IOException e) {
+			throw new PerforceException("Failed to open connection to perforce", e);
+		} finally {
+			p4.close();
+		}
+	}
+	/**
 	 * Executes a perforce command and returns the output as a StringBuilder.
 	 *
 	 * @param cmd
@@ -212,24 +302,21 @@ public class Depot {
 	 * @throws PerforceException
 	 */
 	protected StringBuilder getPerforceResponse(String cmd[]) throws PerforceException {
-		P4Process p = null;
+		Executor p4 = getExecFactory().newExecutor();
 		try {
-			StringBuilder sb = new StringBuilder();
-			p = new P4Process(this);
-			p.exec(cmd);
+			p4.exec(cmd);
+			
+			BufferedReader reader = p4.getReader();
 			String line;
-			while((line = p.readLine()) != null) {
-				sb.append(line + "\n");
+			StringBuilder response = new StringBuilder();
+			while((line = reader.readLine()) != null) {
+				response.append(line + "\n");
 			}
-			return sb;
-		} catch(IOException ex) {
-			if(null != p) {
-				try {
-					p.close();
-				} catch(Exception ignex) { /* Ignored Exception */
-				}
-			}
-			throw new PerforceException(ex.getMessage());			
+			return response;
+		} catch(IOException e) {
+			throw new PerforceException("Failed to communicate with p4", e);
+		} finally {
+			p4.close();
 		}
 	}
 	
@@ -243,37 +330,34 @@ public class Depot {
 	 * the failure.
 	 */
 	public void checkValidity() throws PerforceException {
-		String[] msg = { "Connect to server failed; check $P4PORT", 
+		String[] mesg = { "Connect to server failed; check $P4PORT", 
 				"Perforce password (P4PASSWD) invalid or unset.",
 				"Can't create a new user - over license quota." };
-		int msgndx = -1, i, cnt = 0;
+		int mesgIndex = -1, i, count = 0;
 
-		P4Process p = null;
-		String l;
+		Executor p4 = getExecFactory().newExecutor();
+		String line;
 		String cmd[] = { "p4", "user", "-o" };
 
 		try {
-			p = new P4Process(this);
-			p.exec(cmd);
-			while(null != (l = p.readLine())) {
-				cnt++;
-				for(i = 0; i < msg.length; i++) {
-					if(-1 != l.indexOf(msg[i]))
-						msgndx = i;
+			p4.exec(cmd);
+			BufferedReader reader = p4.getReader();
+			while((line = reader.readLine()) != null) {
+				count++;
+				for(i = 0; i < mesg.length; i++) {
+					if(line.indexOf(mesg[i]) != -1)
+						mesgIndex = i;
 				}
 			}
-			p.close();
+			
 		} catch(IOException ex) {
-			if(null != p) {
-				try {
-					p.close();
-				} catch(Exception ignex) { /* Ignored Exception */
-				}
-			}
+			logger.error("Caught IOException: " + ex.getMessage());
+		} finally {
+			p4.close();
 		}
-		if(-1 != msgndx)
-			throw new PerforceException(msg[msgndx]);
-		if(0 == cnt)
+		if(mesgIndex != -1)
+			throw new PerforceException(mesg[mesgIndex]);
+		if(count == 0)
 			throw new PerforceException("No output from p4 user -o");
 	}
 	
@@ -283,33 +367,15 @@ public class Depot {
 	 * @return
 	 */
 	public String info() throws Exception {
-		P4Process p = new P4Process(this);
+		Executor p4 = getExecFactory().newExecutor();
 		String cmd[] = {"p4", "info" };
-		p.exec(cmd);
+		p4.exec(cmd);
 		StringBuilder sb = new StringBuilder();
 		String line;
-		while((line = p.readLine()) != null) {
+		while((line = p4.getReader().readLine()) != null) {
 			sb.append(line + "\n");
 		}
 		return sb.toString();
-	}
-	
-	/**
-	 * Returns the environment in a <code>String</code> array.
-	 */
-	public String[] getEnvp() {
-		if(!validEnvp) {
-			synchronized(settings) {
-				envp = new String[settings.size()];
-				int i = 0;
-				for(String key : settings.keySet()) {
-					envp[i++] = key + "=" + settings.get(key);
-					//System.out.println("envp[" + i + "] = " + key + "=" + settings.get(key));
-				}
-			}
-			validEnvp = true;
-		}
-		return envp;
 	}
 	
 	/**
@@ -350,7 +416,11 @@ public class Depot {
 		validEnvp = false;
 	}
 
-	/** Returns the P4USER. */
+	/**
+	 * Returns the P4USER.
+	 *
+	 * @return
+	 */
 	public String getUser() {
 		return (String) settings.get("P4USER");
 	}
@@ -368,7 +438,11 @@ public class Depot {
 		validEnvp = false;
 	}
 
-	/** Returns the P4CLIENT. */
+	/**
+	 * Returns the P4CLIENT.
+	 *
+	 * @return
+	 */
 	public String getClient() {
 		return (String) settings.get("P4CLIENT");
 	}
@@ -386,7 +460,11 @@ public class Depot {
 		validEnvp = false;
 	}
 
-	/** Returns the P4PORT. */
+	/**
+	 * Returns the P4PORT.
+	 *
+	 * @return
+	 */
 	public String getPort() {
 		return (String) settings.get("P4PORT");
 	}
@@ -404,7 +482,11 @@ public class Depot {
 		validEnvp = false;
 	}
 
-	/** Returns the P4PASSWORD. */
+	/**
+	 * Returns the P4PASSWORD.
+	 *
+	 * @return
+	 */
 	public String getPassword() {
 		return (String) settings.get("P4PASSWD");
 	}
@@ -474,6 +556,11 @@ public class Depot {
 		validEnvp = false;
 	}
 	
+	/**
+	 * Returns the system drive
+	 *
+	 * @return
+	 */
 	public String getSystemDrive() {
 		return settings.get("SystemDrive");
 	}
@@ -492,6 +579,11 @@ public class Depot {
 		validEnvp = false;
 	}
 
+	/**
+	 * Returns the system root.
+	 *
+	 * @return
+	 */
 	public String getSystemRoot() {
 		return settings.get("SystemRoot");
 	}
@@ -527,17 +619,29 @@ public class Depot {
 		validEnvp = false;
 	}
 
-	/** Returns the path to the executable. */
+	/**
+	 * Returns the path to the executable.
+	 *
+	 * @return
+	 */
 	public String getExecutable() {
 		return p4exe;
 	}
 
-	/** Set the server timeout threshold. */
+	/**
+	 * Set the server timeout threshold.
+	 *
+	 * @param threshold
+	 */
 	public void setServerTimeout(long threshold) {
 		this.threshold = threshold;
 	}
 
-	/** Return the server timeout threshold. */
+	/**
+	 * Return the server timeout threshold.
+	 *
+	 * @return
+	 */
 	public long getServerTimeout() {
 		return threshold;
 	}

@@ -5,7 +5,7 @@
 	<groupId>com.tek42.perforce</groupId>
 	<artifactId>p4java</artifactId>
 	<packaging>jar</packaging>
-	<version>0.5</version>
+	<version>0.6-SNAPSHOT</version>
 	<name>P4Java</name>
 	<url>http://tek42.com/perforce</url>
 	<description>
@@ -15,8 +15,7 @@
 	<licenses>
 		<license>
 			<name>LGPL</name>
-			<url></url>
-			<distribution>repo</distribution>
+			<comments>Library is distributed under the LGPL license</comments>
 		</license>
 	</licenses>
 	<dependencies>

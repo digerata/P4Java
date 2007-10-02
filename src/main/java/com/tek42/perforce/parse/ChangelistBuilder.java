@@ -146,6 +146,6 @@ public class ChangelistBuilder implements Builder<Changelist> {
 	 * @see com.tek42.perforce.parse.Builder#save(java.lang.Object)
 	 */
 	public void save(Changelist obj, Writer out) throws PerforceException {
-		throw new UnsupportedOperationException("This is not implemented yet."); 
+		throw new UnsupportedOperationException("This is not implemented."); 
 	}
 }
