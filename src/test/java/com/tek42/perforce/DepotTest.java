@@ -1,18 +1,16 @@
 package com.tek42.perforce;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertTrue;
 
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
-
-import com.tek42.perforce.model.*;
 /**
  *
  * @author mwille
  *
  */
-public class DepotTest {
+public class DepotTest extends PropertySupport {
 	Depot depot;
 	/**
 	 *
@@ -21,9 +19,10 @@ public class DepotTest {
 	@Before
 	public void setUp() throws Exception {
 		depot = new Depot();
-		depot.setUser("mwille");
-		depot.setPassword("");
-		depot.setPort("codemaster.atdoner.com:1666");
+		depot.setPort(getProperty("p4.port"));
+		depot.setUser(getProperty("p4.user"));
+		depot.setPassword(getProperty("p4.passwd"));
+		depot.setClient(getProperty("p4.client"));
 	}
 
 	/**
@@ -44,6 +43,6 @@ public class DepotTest {
 	 */
 	@Test
 	public void testCheckValidity() throws Exception {
-		depot.checkValidity();
+		assertTrue(depot.isValid());
 	}
 }

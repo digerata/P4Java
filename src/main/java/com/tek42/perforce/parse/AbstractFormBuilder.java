@@ -30,6 +30,7 @@ public abstract class AbstractFormBuilder<T> implements Builder<T> {
 	public T build(StringBuilder sb) throws PerforceException {
 		// Allow our regexp to matcah with only one case and not have to handle the case for the last line
 		sb.append("Endp:\n");
+		logger.debug("Parsing: \n" + sb);
 		Pattern p = Pattern.compile("^(\\w+):(.*?)(?=\\n\\w{4,}?:)", Pattern.DOTALL | Pattern.MULTILINE);
 		Matcher m = p.matcher(sb.toString());
 		Map<String, String> fields = new HashMap<String, String>();

@@ -14,7 +14,7 @@ import com.tek42.perforce.model.Changelist;
  * @author mwille
  *
  */
-public class ChangelistTest {
+public class ChangelistTest extends PropertySupport {
 	Depot depot;
 	
 	/**
@@ -24,9 +24,10 @@ public class ChangelistTest {
 	@Before
 	public void setUp() throws Exception {
 		depot = new Depot();
-		depot.setUser("mwille");
-		depot.setPassword("");
-		depot.setPort("codemaster.atdoner.com:1666");
+		depot.setPort(getProperty("p4.port"));
+		depot.setUser(getProperty("p4.user"));
+		depot.setPassword(getProperty("p4.passwd"));
+		depot.setClient(getProperty("p4.client"));
 	}
 	
 	/**
@@ -34,7 +35,8 @@ public class ChangelistTest {
 	 */
 	@Test
 	public void testGetChangelist() throws Exception {
-		Changelist change = depot.getChangelist(8844);
+		int id = new Integer(getProperty("changelist.middlechange"));
+		Changelist change = depot.getChanges().getChangelist(id);
 		System.out.println("\nRetrieved Changelist:\n" + change.toString());
 	}
 
@@ -42,28 +44,38 @@ public class ChangelistTest {
 	 * Test method for {@link com.tek42.perforce.Depot#getChangelists(java.lang.String, int, int)}.
 	 */
 	@Test
-	public void testGetChangelists() throws Exception {
-		List<Changelist> changes = depot.getChangelists("//depot/Extranet/...", -1, 5);
+	public void testGetLimitedChangelists() throws Exception {
+		List<Changelist> changes = depot.getChanges().getChangelists(getProperty("changelist.project"), -1, 5);
 		assertNotNull(changes);
-		assertTrue(changes.size() > 0);
+		assertTrue(changes.size() == 5);
 		
+		String ids[] = getProperties("changelist.numbers");
+		int i = 0;
 		for(Changelist change: changes) {
-			System.out.println(change);
+			assertEquals(new Integer(ids[i++]).intValue(), change.getChangeNumber());
 		}
 	}
 	
 	@Test
 	public void testGetAllChangelists() throws Exception {
-		List<Changelist> changes = depot.getChangelists("//depot/c-lib/...", 0, -1);
+		List<Changelist> changes = depot.getChanges().getChangelists(getProperty("changelist.project"), 0, -1);
 		assertNotNull(changes);
 		assertTrue(changes.size() > 0);
+		
+		String ids[] = getProperties("changelist.numbers");
+		assertTrue(changes.size() == ids.length);
+		int i = 0;
+		for(Changelist change: changes) {
+			assertEquals(new Integer(ids[i++]).intValue(), change.getChangeNumber());
+		}		
 	}
 
+	@Test
 	public void testGetLastestChange() throws Exception {
-		List<Changelist> changes = depot.getChangelists("//depot/Commons/...", 8813, 1);
+		int change = new Integer(getProperty("changelist.lastchange"));
+		List<Changelist> changes = depot.getChanges().getChangelists(getProperty("changelist.project"), change, 1);
 		assertNotNull(changes);
 		assertEquals(1, changes.size());
-		assertEquals(8881, changes.get(0).getChangeNumber());
-		//assertTrue(changes.size() > 0);
+		assertEquals(change, changes.get(0).getChangeNumber());
 	}
 }

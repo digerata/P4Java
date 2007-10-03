@@ -1,20 +1,21 @@
 package com.tek42.perforce;
 
-import java.util.*;
-import com.tek42.perforce.*;
-import com.tek42.perforce.model.*;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
 
-import static org.junit.Assert.*;
+import java.util.Date;
 
 import org.junit.Before;
 import org.junit.Test;
+
+import com.tek42.perforce.model.Workspace;
 
 /**
  *
  * @author mwille
  *
  */
-public class WorkspaceTest {
+public class WorkspaceTest extends PropertySupport {
 	Depot depot;
 	/**
 	 *
@@ -23,9 +24,10 @@ public class WorkspaceTest {
 	@Before
 	public void setUp() throws Exception {
 		depot = new Depot();
-		depot.setUser("mwille");
-		depot.setPassword("");
-		depot.setPort("codemaster.atdoner.com:1666");
+		depot.setPort(getProperty("p4.port"));
+		depot.setUser(getProperty("p4.user"));
+		depot.setPassword(getProperty("p4.passwd"));
+		depot.setClient(getProperty("p4.client"));
 	}
 
 	/**
@@ -33,60 +35,32 @@ public class WorkspaceTest {
 	 */
 	@Test
 	public void testGetWorkspace() throws Exception {
-		Workspace workspace = depot.getWorkspace("test-workspace");
+		Workspace workspace = depot.getWorkspaces().getWorkspace(getProperty("ws.existingname"));
 		System.out.println("Have workspace: \n" + workspace);
-	}
-	
-	@Test
-	public void testUpdateWorkspace() throws Exception {
-		Workspace workspace = depot.getWorkspace("test-workspace");
-		System.out.println("Have test workspace:\n\n" + workspace);
-		workspace.setRoot("c:/my/test/folder");
-		workspace.clearViews();
-		workspace.addView("//depot/Test/... //test-workspace/...");
-		String desc = "I modified this on " + new Date();
-		workspace.setDescription(desc);
-		workspace.setSubmitOptions("revertunchanged");
-		
-		System.out.println("\n\nMade Changes:\n\n" + workspace);
-		
-		depot.saveWorkspace(workspace);
-		
-		workspace = depot.getWorkspace("test-workspace");
-		assertNotNull(workspace);
-		assertEquals("c:/my/test/folder", workspace.getRoot());
-		assertEquals("//depot/Test/... //test-workspace/...\n", workspace.getViewsAsString());
-		assertEquals(desc, workspace.getDescription());
-		
 	}
 	
 	@Test
 	public void testCreateWorkspace() throws Exception {
 		Workspace workspace = new Workspace();
-		String name = "test-workspace";
+		String name = getProperty("ws.name");
 		workspace.setName(name);
-		workspace.setDescription("Testing workspace created on: " + new Date());
-		workspace.setHost("anyhost");
-		workspace.setLineEnd("unix");
-		workspace.setRoot("c:/any/old/thing");
-		workspace.setAltRoots("/Users/mwille/dev");
-		workspace.setOptions("noallwrite noclobber compress unlocked nomodtime normdir");
-		workspace.setOwner("mwille");
-		workspace.setSubmitOptions("revertunchanged");
-		workspace.addView("//depot/... //test-workspace/...");
+		workspace.setDescription(getProperty("ws.create.desc") + new Date());
+		workspace.setHost(getProperty("ws.create.host"));
+		workspace.setLineEnd(getProperty("ws.create.lineend"));
+		workspace.setRoot(getProperty("ws.create.root"));
+		workspace.setAltRoots(getProperty("ws.create.altroot"));
+		workspace.setOptions(getProperty("ws.create.options"));
+		workspace.setOwner(getProperty("ws.create.owner"));
+		workspace.setSubmitOptions(getProperty("ws.create.submitoptions"));
+		workspace.addView(getProperty("ws.create.view"));
 		
 		Workspace copy = workspace;
 		
-		depot.saveWorkspace(workspace);
+		depot.getWorkspaces().saveWorkspace(workspace);
 		
-		workspace = depot.getWorkspace(name);
+		workspace = depot.getWorkspaces().getWorkspace(name);
 		
 		assertNotNull(workspace);
-		
-		// we have to copy generated values back to the copy object so that
-		// the comparison will work.
-		copy.setAccess(workspace.getAccess());
-		copy.setUpdate(workspace.getUpdate());
 		
 		// For some reason, this doesn't quite work...
 		//assertEquals(copy, workspace);
@@ -100,8 +74,26 @@ public class WorkspaceTest {
 		assertEquals(copy.getSubmitOptions(), workspace.getSubmitOptions());
 		assertEquals(copy.getOwner(), workspace.getOwner());
 		assertEquals(copy.getViewsAsString(), workspace.getViewsAsString());
-		
-		
 	}
 
+	@Test
+	public void testUpdateWorkspace() throws Exception {
+		Workspace workspace = depot.getWorkspaces().getWorkspace(getProperty("ws.name"));
+		
+		workspace.setRoot(getProperty("ws.update.root"));
+		workspace.clearViews();
+		workspace.addView(getProperty("ws.update.view"));
+		String desc = getProperty("ws.update.desc") + new Date();
+		workspace.setDescription(desc);
+		workspace.setSubmitOptions(getProperty("ws.update.submitoptions"));
+		
+		depot.getWorkspaces().saveWorkspace(workspace);
+		
+		workspace = depot.getWorkspaces().getWorkspace(getProperty("ws.name"));
+		assertNotNull(workspace);
+		assertEquals(getProperty("ws.update.root"), workspace.getRoot());
+		assertEquals(getProperty("ws.update.view") + "\n", workspace.getViewsAsString());
+		assertEquals(desc, workspace.getDescription());
+		
+	}
 }
