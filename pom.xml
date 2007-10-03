@@ -8,6 +8,7 @@
 	<version>0.6-SNAPSHOT</version>
 	<name>P4Java</name>
 	<url>http://tek42.com/perforce</url>
+	<inceptionYear>2007</inceptionYear>
 	<description>
 		Open Source Java Library to interact with Perforce SCM
 		Repositories
@@ -69,5 +70,12 @@
 			</extension>
 		</extensions>
 	</build>
-
+	<reporting>
+		<plugins>
+		<plugin>
+			<groupId>org.apache.maven.plugins</groupId>
+			<artifactId>maven-javadoc-plugin</artifactId>
+		</plugin>
+		</plugins>
+	</reporting>
 </project>

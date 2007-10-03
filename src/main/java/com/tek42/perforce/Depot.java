@@ -34,7 +34,8 @@ import com.tek42.perforce.process.ExecutorFactory;
  * // Look at the last change for a project...
  * List<Changelist> changes = depot.getChanges().getChangelists("//depot/ProjectName/...", -1, 1);
  * System.out.println(Last Change is: " + changes.get(0));
- *  
+ * </pre>
+ * 
  * @author Mike Wille
  *
  */
