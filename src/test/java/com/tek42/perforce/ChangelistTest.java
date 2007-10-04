@@ -73,9 +73,28 @@ public class ChangelistTest extends PropertySupport {
 	@Test
 	public void testGetLastestChange() throws Exception {
 		int change = new Integer(getProperty("changelist.lastchange"));
-		List<Changelist> changes = depot.getChanges().getChangelists(getProperty("changelist.project"), change, 1);
+		List<Changelist> changes = depot.getChanges().getChangelists(getProperty("changelist.project"), -1, 1);
 		assertNotNull(changes);
 		assertEquals(1, changes.size());
 		assertEquals(change, changes.get(0).getChangeNumber());
+	}
+	
+	@Test
+	public void testGetChangeNumbers() throws Exception {
+		List<Integer> numbers = depot.getChanges().getChangeNumbers(getProperty("changelist.project"), -1, 5);
+		for(int num : numbers) {
+			System.out.println("Found change: " + num);
+		}
+	}
+	
+	@Test
+	public void testGetRange() throws Exception {
+		int number = new Integer(getProperty("changelist.firstchange"));
+		List<Integer> numbers = depot.getChanges().getChangeNumbersTo(getProperty("changelist.project"), number);
+		String ids[] = getProperties("changelist.numbers");
+		assertTrue(numbers.size() == ids.length);
+		
+		assertEquals(new Integer(getProperty("changelist.lastchange")), numbers.get(0));
+		assertEquals(new Integer(getProperty("changelist.firstchange")), numbers.get(numbers.size() - 1));
 	}
 }
