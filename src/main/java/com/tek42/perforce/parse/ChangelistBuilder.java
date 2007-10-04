@@ -115,7 +115,7 @@ public class ChangelistBuilder implements Builder<Changelist> {
 						// ... //depot/path/to/file/file.ext#1 edit
 						
 						int revStart = entry.indexOf("#");
-						String filename = entry.substring(0, revStart);
+						String filename = entry.substring(4, revStart);
 						String rev = entry.substring(revStart + 1, entry.indexOf(" ", revStart));
 						String action = entry.substring(entry.indexOf(" ", revStart) + 1);
 						Changelist.FileEntry file = new Changelist.FileEntry();
