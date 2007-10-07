@@ -34,6 +34,9 @@ public class CmdLineExecutor implements Executor {
 		builder = new ProcessBuilder(args);
 		Map<String, String> env = builder.environment();
 		for(String key : environment.keySet()) {
+			//if(key.equals("P4PASSWD"))
+				//continue;
+			//logger.info("Settin env: " + key + " = " + environment.get(key));
 			env.put(key, environment.get(key));
 		}
 	}

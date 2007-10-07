@@ -1,5 +1,6 @@
 package com.tek42.perforce.model;
 
+import java.util.Date;
 import java.util.List;
 import java.util.ArrayList;
 
@@ -19,7 +20,7 @@ import java.util.ArrayList;
 public class Changelist {
 	int changeNumber;
 	String workspace;
-	String date;
+	Date date;
 	String user;
 	String description;
 	List<FileEntry> files;
@@ -195,14 +196,14 @@ public class Changelist {
 	/**
 	 * @return the date
 	 */
-	public String getDate() {
+	public Date getDate() {
 		return date;
 	}
 
 	/**
 	 * @param date the date to set
 	 */
-	public void setDate(String date) {
+	public void setDate(Date date) {
 		this.date = date;
 	}
 

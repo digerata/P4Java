@@ -1,8 +1,5 @@
 package com.tek42.perforce.model;
 
-import java.util.List;
-import java.util.ArrayList;
-
 /**
  * Represents a Perforce clientspec or workspace.
  * <p>
@@ -12,7 +9,7 @@ import java.util.ArrayList;
  * 
  * @author Mike Wille
  */
-public class Workspace {
+public class Workspace extends AbstractViewsSupport {
 	String name;
 	String owner;
 	String host;
@@ -24,9 +21,9 @@ public class Workspace {
 	String submitOptions;
 	String update;
 	String access;
-	List<String> views;
 	
 	public Workspace() {
+		super();
 		this.name = "";
 		this.owner = "";
 		this.host = "";
@@ -34,7 +31,6 @@ public class Workspace {
 		this.root = "";
 		this.altRoots = "";
 		this.options = "";
-		this.views = new ArrayList<String>(1);
 		this.lineEnd = "";
 		this.submitOptions = "";
 		this.update = "";
@@ -166,35 +162,6 @@ public class Workspace {
 	 */
 	public void setOptions(String options) {
 		this.options = options;
-	}
-
-	/**
-	 * @return the view
-	 */
-	public List<String> getViews() {
-		return views;
-	}
-
-	public String getViewsAsString() {
-		StringBuilder sb = new StringBuilder();
-		for(String view : views) {
-			sb.append(view + "\n");
-		}
-		return sb.toString();
-	}
-	/**
-	 * @param view
-	 *            the view to set
-	 */
-	public void addView(String view) {
-		this.views.add(view);
-	}
-
-	/**
-	 * Removes all views from this client.
-	 */
-	public void clearViews() {
-		this.views.clear();
 	}
 
 	/**

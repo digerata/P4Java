@@ -9,9 +9,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.perforce.api.Env;
-import com.tek42.perforce.parse.Changes;
-import com.tek42.perforce.parse.Users;
-import com.tek42.perforce.parse.Workspaces;
+import com.tek42.perforce.parse.*;
 import com.tek42.perforce.process.DefaultExecutorFactory;
 import com.tek42.perforce.process.Executor;
 import com.tek42.perforce.process.ExecutorFactory;
@@ -54,6 +52,8 @@ public class Depot {
 	private Changes changes;
 	private Workspaces workspaces;
 	private Users users;
+	private Labels labels;
+	private Status status;
 	
 	/**
 	 * If not using this in a Dependancy Injection environment, use this method to get ahold of the depot.
@@ -144,7 +144,7 @@ public class Depot {
 	/**
 	 * Retrieves the Changes object for interacting with this depot's changelists
 	 *
-	 * @return
+	 * @return	Changes object
 	 */
 	public Changes getChanges() {
 		if(changes == null)
@@ -155,7 +155,7 @@ public class Depot {
 	/**
 	 * Retrieves the Workspaces object for interacting with this depot's workspaces
 	 *
-	 * @return
+	 * @return Workspaces object
 	 */	
 	public Workspaces getWorkspaces() {
 		if(workspaces == null)
@@ -166,7 +166,7 @@ public class Depot {
 	/**
 	 * Retrieves the Users object for interacting with this depot's users.
 	 *
-	 * @return
+	 * @return	Users object
 	 */
 	public Users getUsers() {
 		if(users == null)
@@ -175,53 +175,33 @@ public class Depot {
 	}
 	
 	/**
-	 * Checks the environment to see if it is valid. To check the validity of
-	 * the environment, the user information is accessed. This ensures that the
-	 * server can be contacted and that the password is set properly.
-	 * <p>
-	 * If the environment is valid, this method will return quietly. Otherwise,
-	 * it will throw a <code>PerforceException</code> with a message regarding
-	 * the failure.
+	 * Retrieves the labels object for interacting with this depot's labels.
+	 *
+	 * @return	Labels object
 	 */
-	public boolean isValid() throws PerforceException {
-		String[] mesg = { "Connect to server failed; check $P4PORT", 
-				"Perforce password (P4PASSWD) invalid or unset.",
-				"Can't create a new user - over license quota." };
-		int mesgIndex = -1, i, count = 0;
-
-		Executor p4 = getExecFactory().newExecutor();
-		String line;
-		String cmd[] = { "p4", "user", "-o" };
-
-		try {
-			p4.exec(cmd);
-			BufferedReader reader = p4.getReader();
-			while((line = reader.readLine()) != null) {
-				count++;
-				for(i = 0; i < mesg.length; i++) {
-					if(line.indexOf(mesg[i]) != -1)
-						mesgIndex = i;
-				}
-			}
-			
-			if(mesgIndex != -1)
-				throw new PerforceException(mesg[mesgIndex]);
-			if(count == 0)
-				throw new PerforceException("No output from p4 user -o");
-			
-			return true;
-		} catch(IOException ex) {
-			logger.error("Caught IOException: " + ex.getMessage());
-			return false;
-		} finally {
-			p4.close();
-		}
+	public Labels getLabels() {
+		if(labels == null)
+			labels = new Labels(this);
+		return labels;
+	}
+	
+	/**
+	 * Retrieves the status object for interacting with the depot's status.
+	 * <p>
+	 * E.g., depot.getStatus().isValid() for checking if the settings are correct.
+	 * 
+	 * @return Status object
+	 */
+	public Status getStatus() {
+		if(status == null)
+			status = new Status(this);
+		return status;
 	}
 	
 	/**
 	 * Returns the output created by "p4 info"
 	 *
-	 * @return
+	 * @return	The string output of p4 info
 	 */
 	public String info() throws Exception {
 		Executor p4 = getExecFactory().newExecutor();

@@ -47,7 +47,11 @@ public class ChangelistBuilder implements Builder<Changelist> {
 					change.setUser(user.substring(0, user.indexOf("@")));
 					change.setWorkspace(user.substring(user.indexOf("@") + 1));
 					details.nextToken(); // on
-					change.setDate(details.nextToken());
+					
+					String date = details.nextToken();
+					String time = details.nextToken();
+					
+					change.setDate(parseDate(date + " " + time));
 					
 					// the lines immediately following is the description
 					String desc = "";
@@ -148,4 +152,39 @@ public class ChangelistBuilder implements Builder<Changelist> {
 	public void save(Changelist obj, Writer out) throws PerforceException {
 		throw new UnsupportedOperationException("This is not implemented."); 
 	}
+	
+	/**
+	 * Returns a java.util.Date object set to the time specified in newDate.  The format
+	 * expected is the format of: YYYY-MM-DD HH:MM:SS
+	 * 
+	 * @param	newDate the string date to convert
+	 * @return	A java.util.Date based off of the string format.
+	 */
+	public static java.util.Date parseDate(String newDate) {
+		// when we have a null from the database, give it zeros first.
+		if(newDate == null || newDate.equals("")) {
+			return null;
+		}
+		
+		String parts[] = newDate.split(" ");
+		String date[] = parts[0].split("/");
+		String time[] = null;
+		
+		if(parts.length > 1) {
+			time = parts[1].split(":");
+			time[2] = time[2].replaceAll("\\.0", "");
+		} else {
+			time = "00:00:00".split(":");
+		}
+		
+		GregorianCalendar cal = (GregorianCalendar) Calendar.getInstance();
+		cal.clear();
+		
+		cal.set(new Integer(date[0]).intValue(), (new Integer(date[1]).intValue() - 1), 
+				new Integer(date[2]).intValue(), new Integer(time[0]).intValue(), 
+				new Integer(time[1]).intValue(), new Integer(time[2]).intValue());
+		
+		return cal.getTime();		
+	}
+	
 }

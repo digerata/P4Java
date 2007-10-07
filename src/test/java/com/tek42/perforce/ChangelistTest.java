@@ -97,4 +97,16 @@ public class ChangelistTest extends PropertySupport {
 		assertEquals(new Integer(getProperty("changelist.lastchange")), numbers.get(0));
 		assertEquals(new Integer(getProperty("changelist.firstchange")), numbers.get(numbers.size() - 1));
 	}
+	
+	@Test
+	public void testGetChangeNumbersNotInclusive()  throws Exception {
+		int change = new Integer(getProperty("changelist.lastchange"));
+		System.out.println("Last change listed in config: " + change);
+		List<Changelist> changes = depot.getChanges().getChangelistsFromNumbers(depot.getChanges().getChangeNumbersTo(getProperty("changelist.project"), change + 1));
+		assertTrue(changes.size() == 0);
+		
+		changes = depot.getChanges().getChangelists(getProperty("changelist.project"), -1, 1);
+		assertEquals(change, changes.get(0).getChangeNumber());
+		System.out.println("Latest change in depot is: " + changes.get(0).getChangeNumber());
+	}
 }

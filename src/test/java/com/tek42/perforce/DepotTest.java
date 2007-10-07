@@ -1,5 +1,7 @@
 package com.tek42.perforce;
 
+import java.io.*;
+
 import static org.junit.Assert.assertTrue;
 
 import org.junit.After;
@@ -23,6 +25,11 @@ public class DepotTest extends PropertySupport {
 		depot.setUser(getProperty("p4.user"));
 		depot.setPassword(getProperty("p4.passwd"));
 		depot.setClient(getProperty("p4.client"));
+		
+		String home = System.getProperty("user.home");
+		System.out.println("Deleting p4 tickets under: " + home);
+		new File(home + "/" + ".p4tickets").delete();
+		new File(home + "\\" + "p4tickets.txt").delete();
 	}
 
 	/**
@@ -43,6 +50,6 @@ public class DepotTest extends PropertySupport {
 	 */
 	@Test
 	public void testCheckValidity() throws Exception {
-		assertTrue(depot.isValid());
+		assertTrue(depot.getStatus().isValid());
 	}
 }
