@@ -50,6 +50,22 @@ public class Workspaces extends AbstractPerforceTemplate {
 	 * @throws PerforceException
 	 */
 	public StringBuilder syncToHead(String path) throws PerforceException {
-		return getPerforceResponse(new String[] { "p4", "sync", path });
+		return syncToHead(path, false);
+	}
+	
+	/**
+	 * Synchronizes to the latest change for the specified path.  Allows a force sync to be
+	 * performed by passing true to forceSync parameter.
+	 * 
+	 * @param path		The depot path to sync to
+	 * @param forceSync	True to force sync and overwrite local files
+	 * @return			StringBuilder containing output of p4 response.
+	 * @throws PerforceException
+	 */
+	public StringBuilder syncToHead(String path, boolean forceSync) throws PerforceException {
+		if(forceSync)
+			return getPerforceResponse(new String[] { "p4", "sync", "-f", path });
+		else
+			return getPerforceResponse(new String[] { "p4", "sync", path });
 	}
 }
