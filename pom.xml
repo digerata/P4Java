@@ -10,8 +10,7 @@
 	<url>http://tek42.com/perforce</url>
 	<inceptionYear>2007</inceptionYear>
 	<description>
-		Open Source Java Library to interact with Perforce SCM
-		Repositories
+		Open Source Java Library to interact with Perforce SCM Repositories
 	</description>
 	<licenses>
 		<license>
@@ -48,7 +47,7 @@
 	<distributionManagement>
 		<repository>
 			<id>tek42.com</id>
-			<url>scp://tek42.com/var/www/www.tek42.com/web/maven2/</url>
+			<url>scp://tek42.com/var/www/www.tek42.com/web/maven2</url>
 		</repository>
 	</distributionManagement>
 	<build>
