@@ -147,6 +147,34 @@
 					</formats>
 				</configuration>
 			</plugin>
+			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-checkstyle-plugin</artifactId>
+				<configuration>
+					<configLocation>checkstyle.xml</configLocation>
+					<suppressionsLocation>checkstyle-suppressions.xml</suppressionsLocation>
+				</configuration>
+			</plugin>
+			<plugin>
+				<groupId>org.codehaus.mojo</groupId>
+				<artifactId>findbugs-maven-plugin</artifactId>
+				<version>1.1.1</version>
+				<configuration>
+					<xmlOutput>true</xmlOutput>
+					<threshold>Low</threshold>
+					<effort>Max</effort>
+					<debug>false</debug>
+					<relaxed>false</relaxed>
+					<!--
+					<excludeFilterFile>
+					${project.artifactId}/findbugs-exclusion-filter.xml
+					</excludeFilterFile>
+					<includeFilterFile>
+					${project.artifactId}/findbugs-inclusion-filter.xml
+					</includeFilterFile>
+					-->
+				</configuration>
+			</plugin>
 		</plugins>
 	</reporting>
 	<!-- 
