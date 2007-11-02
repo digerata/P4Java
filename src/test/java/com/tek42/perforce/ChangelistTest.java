@@ -47,7 +47,7 @@ public class ChangelistTest extends PropertySupport {
 	public void testGetLimitedChangelists() throws Exception {
 		List<Changelist> changes = depot.getChanges().getChangelists(getProperty("changelist.project"), -1, 5);
 		assertNotNull(changes);
-		assertTrue(changes.size() == 5);
+		assertTrue(changes.size() == 4);
 		
 		String ids[] = getProperties("changelist.numbers");
 		int i = 0;
