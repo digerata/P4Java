@@ -23,7 +23,28 @@ public class Status extends AbstractPerforceTemplate {
 	 * the failure.
 	 */
 	public boolean isValid() throws PerforceException {
-		StringBuilder sb = getPerforceResponse(new String[] { "p4", "user", "-o" });
+		getPerforceResponse(new String[] { "p4", "user", "-o" });
+		return true;
+	}
+	
+	/**
+	 * Checks the specified path to see if it exists in the depot.  This may
+	 * take a bit of time the first time it is called.  It seems perforce
+	 * takes a bit to wake up.
+	 * <p>
+	 * The path must end with the perforce wildcard: /...  Otherwise it will
+	 * return no results.  
+	 * <p>
+	 * Note: this method may move once the API is more complete.
+	 * 
+	 * @param path	Path to check, example: //depot/MyProject/...
+	 * @return	True if it exists, false if not.
+	 * @throws PerforceException
+	 */
+	public boolean exists(String path) throws PerforceException {
+		StringBuilder sb = getPerforceResponse(new String[] { "p4", "fstat", "-m", "1", path });
+		if(sb.indexOf("no such file(s).") > 0)
+			return false;
 		return true;
 	}
 }

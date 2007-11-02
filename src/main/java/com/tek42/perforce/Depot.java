@@ -1,7 +1,5 @@
 package com.tek42.perforce;
 
-import java.io.BufferedReader;
-import java.io.IOException;
 import java.util.HashMap;
 import java.util.StringTokenizer;
 
@@ -9,7 +7,11 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.perforce.api.Env;
-import com.tek42.perforce.parse.*;
+import com.tek42.perforce.parse.Changes;
+import com.tek42.perforce.parse.Labels;
+import com.tek42.perforce.parse.Status;
+import com.tek42.perforce.parse.Users;
+import com.tek42.perforce.parse.Workspaces;
 import com.tek42.perforce.process.DefaultExecutorFactory;
 import com.tek42.perforce.process.Executor;
 import com.tek42.perforce.process.ExecutorFactory;

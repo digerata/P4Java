@@ -25,7 +25,7 @@ Example Usage:<br>
  depot.setWorkspace("workspace");
  
  // Test
- depot.isValid()  // returns true if so 
+ depot.getStatus().isValid()  // returns true if so 
  
  // Look at the last change for a project...
  List changes = depot.getChanges().getChangelists("//depot/ProjectName/...", -1, 1);

@@ -5,7 +5,7 @@
 	<groupId>com.tek42.perforce</groupId>
 	<artifactId>p4java</artifactId>
 	<packaging>jar</packaging>
-	<version>0.7.2</version>
+	<version>0.7.3-SNAPSHOT</version>
 	<name>P4Java</name>
 	<url>http://tek42.com/perforce</url>
 	<inceptionYear>2007</inceptionYear>
@@ -87,10 +87,32 @@
 			<plugin>
 				<groupId>org.codehaus.mojo</groupId>
 				<artifactId>cobertura-maven-plugin</artifactId>
+				<executions>
+					<execution>
+						<goals>
+							<goal>clean</goal>
+							<goal>check</goal>
+						</goals>
+					</execution>
+        		</executions>
 				<configuration>
+					<instrumentation>
+						<includes>
+							<include>**/*.class</include>
+						</includes>
+						<!-- 
+						<ignores>
+							<ignore>com.perforce.api.*</ignore>
+						</ignores>
+						-->
+						<excludes>
+							<exclude>com/perforce/api/**/*.class</exclude>
+							<exclude>**/*Test.class</exclude>
+						</excludes>
+					</instrumentation>
 					<check>
-						<branchRate>75</branchRate>
-						<lineRate>75</lineRate>
+						<branchRate>0</branchRate>
+						<lineRate>0</lineRate>
 						<haltOnFailure>false</haltOnFailure>
 						<totalBranchRate>0</totalBranchRate>
 						<totalLineRate>0</totalLineRate>
@@ -99,28 +121,12 @@
 						<regexes>
 							<regex>
 								<pattern>com.tek42.*</pattern>
-								<branchRate>75</branchRate>
-								<lineRate>75</lineRate>
+								<branchRate>0</branchRate>
+								<lineRate>0</lineRate>
 							</regex>
 						</regexes>
 					</check>
-					<instrumentation>
-						<ignores>
-							<ignore>com.perforce.api.*</ignore>
-						</ignores>
-						<excludes>
-							<exclude>com/perforce/api/**/*.class</exclude>
-						</excludes>
-					</instrumentation>
 				</configuration>
-				<executions>
-					<execution>
-						<goals>
-							<goal>clean</goal>
-							<goal>check</goal>
-						</goals>
-					</execution>
-				</executions>
 			</plugin>
 		</plugins>
 		<extensions>

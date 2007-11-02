@@ -36,7 +36,7 @@ public class CmdLineExecutor implements Executor {
 		for(String key : environment.keySet()) {
 			//if(key.equals("P4PASSWD"))
 				//continue;
-			//logger.info("Settin env: " + key + " = " + environment.get(key));
+			//logger.warn("Settin env: " + key + " = " + environment.get(key));
 			env.put(key, environment.get(key));
 		}
 	}
