@@ -8,7 +8,8 @@ import com.tek42.perforce.PerforceException;
 import com.tek42.perforce.model.Label;
 
 /**
- *
+ * Responsible for building and saving labels.
+ * 
  * @author mwille
  *
  */

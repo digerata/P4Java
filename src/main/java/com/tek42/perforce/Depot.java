@@ -48,6 +48,7 @@ public class Depot {
 	private boolean validEnvp;
 	private String p4exe;
 	private long threshold;
+	private String p4Ticket;
 	
 	ExecutorFactory execFactory;
 	
@@ -485,4 +486,24 @@ public class Depot {
 		return threshold;
 	}
 
+	/**
+	 * Returns the ticket value for this depot's user.
+	 * 
+	 * @return the p4Ticket
+	 */
+	public String getP4Ticket() {
+		return p4Ticket;
+	}
+
+	/**
+	 * If using tickets, set the value of the ticket for this depot's user.
+	 * Example value would be: 875477B92937E4AF7B20C5234C8905E2
+	 * 
+	 * @param ticket the p4Ticket to set
+	 */
+	public void setP4Ticket(String ticket) {
+		p4Ticket = ticket;
+	}
+
+	
 }

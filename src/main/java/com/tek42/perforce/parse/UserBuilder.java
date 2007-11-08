@@ -3,11 +3,11 @@ package com.tek42.perforce.parse;
 import java.io.Writer;
 import java.util.Map;
 
-import com.tek42.perforce.model.*;
 import com.tek42.perforce.PerforceException;
+import com.tek42.perforce.model.User;
 
 /**
- * Responsible for building a user
+ * Responsible for building and saving user objects
  * 
  * @author Mike Wille
  *

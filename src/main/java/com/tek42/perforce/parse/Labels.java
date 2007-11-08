@@ -1,9 +1,11 @@
 package com.tek42.perforce.parse;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.List;
 
-import com.tek42.perforce.*;
-import com.tek42.perforce.model.*;
+import com.tek42.perforce.Depot;
+import com.tek42.perforce.PerforceException;
+import com.tek42.perforce.model.Label;
 
 /**
  *

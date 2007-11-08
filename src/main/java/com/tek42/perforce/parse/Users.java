@@ -1,6 +1,6 @@
 package com.tek42.perforce.parse;
 
-import com.tek42.perforce.*;
+import com.tek42.perforce.Depot;
 import com.tek42.perforce.model.User;
 
 /**

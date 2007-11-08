@@ -3,9 +3,9 @@ package com.tek42.perforce.parse;
 import java.util.ArrayList;
 import java.util.List;
 
+import com.tek42.perforce.Depot;
 import com.tek42.perforce.PerforceException;
 import com.tek42.perforce.model.Changelist;
-import com.tek42.perforce.Depot;
 
 /**
  * Base API object for interacting with changelists
