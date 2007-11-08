@@ -99,7 +99,6 @@ public abstract class AbstractPerforceTemplate {
 			// back to our regularly scheduled programming...
 			p4.exec(cmds);
 			BufferedReader reader = p4.getReader();
-			
 			BufferedWriter writer = p4.getWriter();
 			final StringBuilder log = new StringBuilder();
 			Writer fwriter = new FilterWriter(writer) {
@@ -116,6 +115,9 @@ public abstract class AbstractPerforceTemplate {
 			String error = "";
 			String info = "";
 			int exitCode = 0;
+			// Note: we do not try a p4 login here.  There is a danger that we could 
+			// potentially not be authenticated yet.  However, I believe that in normal 
+			// operation you would have already received a ticket via getPerforceResponse()
 			while((line = reader.readLine()) != null) {
 				logger.debug("LineIn -> " + line);
 				if(line.startsWith("error")) {
@@ -166,19 +168,24 @@ public abstract class AbstractPerforceTemplate {
 				"Can't create a new user - over license quota.",
 				"Access for user '"};
 		boolean loop = false;
-		int loopCounter = 0;
+		boolean attemptLogin = true;
+		
 		StringBuilder response = new StringBuilder();
 		do {
 			int mesgIndex = -1, i, count = 0;
 			Executor p4 = depot.getExecFactory().newExecutor();
 			String debugCmd = "";
 			try {
+				// get entire cmd to execute
 				cmd = getExtraParams(cmd);
+				
+				// setup information for logging...
 				for(String cm : cmd) {
 					debugCmd += cm + " ";
 				}
-				p4.exec(cmd);
 				
+				// Performe execution and IO
+				p4.exec(cmd);				
 				BufferedReader reader = p4.getReader();
 				String line;
 				response = new StringBuilder();
@@ -190,18 +197,20 @@ public abstract class AbstractPerforceTemplate {
 					}
 					response.append(line + "\n");
 				}
-				if(loopCounter == 0 && (mesgIndex == 1 || mesgIndex == 2)) {
+				loop = false;
+				// If we failed to execute because of an authentication issue, try a p4 login.
+				if(attemptLogin && (mesgIndex == 1 || mesgIndex == 2)) {
 					// password is unset means that perforce isn't using the environment var P4PASSWD
 					// Instead it is using tickets.  We must attempt to login via p4 login, then
 					// retry this cmd.
 					p4.close();
 					login();
 					loop = true;
-					loopCounter++;
+					attemptLogin = false;
 					continue;
 				}
 				
-				// the way the warnings are currently setup doesn't work for some new messages...
+				// We aren't using the exact message because we want to add the username for more info
 				if(mesgIndex == 4)
 					throw new PerforceException("Access for user '" + depot.getUser() + "' has not been enabled by 'p4 protect'");
 				if(mesgIndex != -1)
@@ -215,6 +224,7 @@ public abstract class AbstractPerforceTemplate {
 				p4.close();
 			}
 		} while(loop);
+		
 		return response;
 	}
 	
@@ -248,13 +258,13 @@ public abstract class AbstractPerforceTemplate {
 		} else { // for everything not windows...
 			Executor login = depot.getExecFactory().newExecutor();
 			// The -p parameter outputs the ticket to stdout.
-			login.exec(new String[] {"echo", depot.getPassword(), "|", "p4", "login", "-p"});
+			login.exec(new String[] {"/bin/sh", "-c", "echo \"" + depot.getPassword() + "\" | p4 login -p"});
 			BufferedReader reader = login.getReader();
 			String line;
 			String ticket = null;
 			try {
+				// The last line output from p4 login will be the ticket
 				while((line = reader.readLine()) != null) {
-					logger.warn("Line: " + ticket);
 					ticket = line;
 				}
 				
@@ -263,9 +273,10 @@ public abstract class AbstractPerforceTemplate {
 			}
 			// if we obtained a ticket, save it for later use.  Our environment setup by Depot can't usually
 			// see the .p4tickets file.
-			logger.warn("Ticket: " + ticket);
-			if(ticket != null)
+			if(ticket != null) {
+				logger.warn("Using p4 issued ticket.");
 				depot.setP4Ticket(ticket);
+			}
 			
 			login.close();
 		}
