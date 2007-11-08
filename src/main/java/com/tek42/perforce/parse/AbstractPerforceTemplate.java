@@ -162,6 +162,7 @@ public abstract class AbstractPerforceTemplate {
 	protected StringBuilder getPerforceResponse(String cmd[]) throws PerforceException {
 		String[] mesg = { "Connect to server failed; check $P4PORT", 
 				"Perforce password (P4PASSWD) invalid or unset.",
+				"Password not allowed at this server security level, use 'p4 login'",
 				"Can't create a new user - over license quota.",
 				"Access for user '"};
 		boolean loop = false;
@@ -189,7 +190,7 @@ public abstract class AbstractPerforceTemplate {
 					}
 					response.append(line + "\n");
 				}
-				if(loopCounter == 0 && mesgIndex == 1) {
+				if(loopCounter == 0 && (mesgIndex == 1 || mesgIndex == 2)) {
 					// password is unset means that perforce isn't using the environment var P4PASSWD
 					// Instead it is using tickets.  We must attempt to login via p4 login, then
 					// retry this cmd.
@@ -201,7 +202,7 @@ public abstract class AbstractPerforceTemplate {
 				}
 				
 				// the way the warnings are currently setup doesn't work for some new messages...
-				if(mesgIndex == 3)
+				if(mesgIndex == 4)
 					throw new PerforceException("Access for user '" + depot.getUser() + "' has not been enabled by 'p4 protect'");
 				if(mesgIndex != -1)
 					throw new PerforceException(mesg[mesgIndex]);
