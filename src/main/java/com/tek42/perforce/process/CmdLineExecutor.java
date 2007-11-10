@@ -32,11 +32,11 @@ public class CmdLineExecutor implements Executor {
 		args = new ArrayList<String>();
 		builder = new ProcessBuilder(args);
 		Map<String, String> env = builder.environment();
-		for(String key : environment.keySet()) {
+		for(Map.Entry<String, String> entry : environment.entrySet()) {
 			// if(key.equals("P4PASSWD"))
 			// continue;
 			// logger.warn("Settin env: " + key + " = " + environment.get(key));
-			env.put(key, environment.get(key));
+			env.put(entry.getKey(), entry.getValue());
 		}
 	}
 
@@ -47,9 +47,9 @@ public class CmdLineExecutor implements Executor {
 	 */
 	public void exec(String[] args) throws PerforceException {
 		this.args.clear();
-		String debug = "";
+		StringBuilder debug = new StringBuilder();
 		for(String arg : args) {
-			debug += arg + " ";
+			debug.append(arg + " ");
 			this.args.add(arg);
 		}
 		logger.info("Executing: " + debug);

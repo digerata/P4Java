@@ -91,7 +91,7 @@ public class Depot {
 
 		String os = System.getProperty("os.name");
 
-		if(null == os) {
+		if(os == null) {
 			return;
 		}
 

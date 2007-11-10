@@ -31,9 +31,8 @@ public class Changes extends AbstractPerforceTemplate {
 	 * @throws PerforceException
 	 */
 	public Changelist getChangelist(int number) throws PerforceException {
-		String id = new Integer(number).toString();
 		ChangelistBuilder builder = new ChangelistBuilder();
-		Changelist change = builder.build(getPerforceResponse(builder.getBuildCmd(id)));
+		Changelist change = builder.build(getPerforceResponse(builder.getBuildCmd(Integer.toString(number))));
 		if(change == null)
 			throw new PerforceException("Failed to retrieve changelist " + number);
 		return change;
@@ -59,7 +58,7 @@ public class Changes extends AbstractPerforceTemplate {
 		String cmd[];
 
 		if(limit > 0)
-			cmd = new String[] { "p4", "changes", "-m", new Integer(limit).toString(), path };
+			cmd = new String[] { "p4", "changes", "-m", Integer.toString(limit), path };
 		else
 			cmd = new String[] { "p4", "changes", path };
 
@@ -103,7 +102,7 @@ public class Changes extends AbstractPerforceTemplate {
 		String cmd[];
 
 		if(limit > 0)
-			cmd = new String[] { "p4", "changes", "-m", new Integer(limit).toString(), path };
+			cmd = new String[] { "p4", "changes", "-m", Integer.toString(limit), path };
 		else
 			cmd = new String[] { "p4", "changes", path };
 

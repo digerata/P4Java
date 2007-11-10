@@ -6,6 +6,7 @@ import java.util.Calendar;
 import java.util.GregorianCalendar;
 import java.util.List;
 import java.util.StringTokenizer;
+import java.util.Locale;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -59,14 +60,14 @@ public class ChangelistBuilder implements Builder<Changelist> {
 					change.setDate(parseDate(date + " " + time));
 
 					// the lines immediately following is the description
-					String desc = "";
+					StringBuilder desc = new StringBuilder();
 					line = lines.nextToken();
 					while(line != null && !line.startsWith("Affected files") && !line.startsWith("Jobs fixed")) {
 						logger.debug("Description Line: " + line);
-						desc += line + "\n";
+						desc.append(line + "\n");
 						line = lines.nextToken();
 					}
-					change.setDescription(desc.trim());
+					change.setDescription(desc.toString().trim());
 
 				}
 
@@ -130,7 +131,7 @@ public class ChangelistBuilder implements Builder<Changelist> {
 						Changelist.FileEntry file = new Changelist.FileEntry();
 						file.setFilename(filename);
 						file.setRevision(rev);
-						file.setAction(Changelist.FileEntry.Action.valueOf(action.toUpperCase()));
+						file.setAction(Changelist.FileEntry.Action.valueOf(action.toUpperCase(Locale.US)));
 						files.add(file);
 					}
 

@@ -90,9 +90,9 @@ public abstract class AbstractPerforceTemplate {
 			String cmds[] = getExtraParams(builder.getSaveCmd());
 
 			// for exception reporting...
-			String debugCmd = "";
+			StringBuilder debugCmd = new StringBuilder();
 			for(String cm : cmds) {
-				debugCmd += cm + " ";
+				debugCmd.append(cm + " ");
 			}
 
 			// back to our regularly scheduled programming...
