@@ -30,6 +30,26 @@ public class LabelsTest extends PropertySupport {
 	}
 
 	/**
+	 * Test method for {@link com.tek42.perforce.parse.Labels#getLabels(java.lang.String)}.
+	 */
+	@Test
+	public void testGetLabels() throws Exception {
+				
+	}
+
+	/**
+	 * Test method for {@link com.tek42.perforce.parse.Labels#getLabel(java.lang.String)}.
+	 */
+	@Test
+	public void testGetLabel() throws Exception {
+		Label label = depot.getLabels().getLabel(getProperty("label.name"));
+		assertNotNull(label);
+		assertEquals(getProperty("label.name"), label.getName());
+		ticket = depot.getP4Ticket();
+		System.out.println("GetLabel -> Ticket: " + ticket);
+	}
+
+	/**
 	 * Test method for {@link com.tek42.perforce.parse.Labels#saveLabel(com.tek42.perforce.model.Label)}.
 	 */
 	@Test
@@ -58,25 +78,4 @@ public class LabelsTest extends PropertySupport {
 		assertEquals(copy.getRevision(), label.getRevision());
 		assertEquals(copy.getViewsAsString(), label.getViewsAsString());
 	}
-
-	/**
-	 * Test method for {@link com.tek42.perforce.parse.Labels#getLabels(java.lang.String)}.
-	 */
-	@Test
-	public void testGetLabels() throws Exception {
-				
-	}
-
-	/**
-	 * Test method for {@link com.tek42.perforce.parse.Labels#getLabel(java.lang.String)}.
-	 */
-	@Test
-	public void testGetLabel() throws Exception {
-		Label label = depot.getLabels().getLabel(getProperty("label.name"));
-		assertNotNull(label);
-		assertEquals(getProperty("label.name"), label.getName());
-		ticket = depot.getP4Ticket();
-		System.out.println("GetLabel -> Ticket: " + ticket);
-	}
-
 }
