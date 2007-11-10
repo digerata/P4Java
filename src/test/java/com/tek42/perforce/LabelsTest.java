@@ -14,6 +14,7 @@ import com.tek42.perforce.model.*;
  */
 public class LabelsTest extends PropertySupport {
 	Depot depot;
+	static String ticket;
 	/**
 	 *
 	 * @throws java.lang.Exception
@@ -25,7 +26,7 @@ public class LabelsTest extends PropertySupport {
 		depot.setUser(getProperty("p4.user"));
 		depot.setPassword(getProperty("p4.passwd"));
 		depot.setClient(getProperty("p4.client"));
-		
+		depot.setP4Ticket(ticket);
 	}
 
 	/**
@@ -73,6 +74,7 @@ public class LabelsTest extends PropertySupport {
 		Label label = depot.getLabels().getLabel(getProperty("label.name"));
 		assertNotNull(label);
 		assertEquals(getProperty("label.name"), label.getName());
+		ticket = depot.getP4Ticket();
 	}
 
 }
