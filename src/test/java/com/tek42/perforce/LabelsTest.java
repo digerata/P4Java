@@ -34,6 +34,7 @@ public class LabelsTest extends PropertySupport {
 	 */
 	@Test
 	public void testSaveLabel() throws Exception {
+		System.out.println("SaveLabel ->Ticket: " + ticket);
 		Label label = new Label();
 		label.setName(getProperty("label.name"));
 		label.setDescription(getProperty("label.desc"));
@@ -75,6 +76,7 @@ public class LabelsTest extends PropertySupport {
 		assertNotNull(label);
 		assertEquals(getProperty("label.name"), label.getName());
 		ticket = depot.getP4Ticket();
+		System.out.println("GetLabel -> Ticket: " + ticket);
 	}
 
 }
