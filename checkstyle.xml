@@ -102,7 +102,9 @@
         <module name="AvoidNestedBlocks"/>
         <module name="EmptyBlock"/>
         <module name="LeftCurly"/>
+        <!-- I want this check, but I can't make it fit for all of the different ways we want to keep
         <module name="NeedBraces"/>
+        -->
         <module name="RightCurly"/>
 
 
@@ -112,7 +114,11 @@
         <module name="DoubleCheckedLocking"/>    <!-- MY FAVOURITE -->
         <module name="EmptyStatement"/>
         <module name="EqualsHashCode"/>
+        <!-- Seems like this would be useful, but it isn't.  For the standard idiom of 
+        this.field = field 
+        and this guy goes beserk.  Well kiss my ass!
         <module name="HiddenField"/>
+        -->
         <module name="IllegalInstantiation"/>
         <module name="InnerAssignment"/>
         <module name="MagicNumber"/>
