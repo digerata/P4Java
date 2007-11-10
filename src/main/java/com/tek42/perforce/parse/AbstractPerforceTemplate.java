@@ -264,6 +264,17 @@ public abstract class AbstractPerforceTemplate {
 				while((line = reader.readLine()) != null) {
 					ticket = line;
 				}
+				
+				// Strange error under Unit Testing, though I don't believe it exists outside of
+				// the build environment, I still want to be able to test security level 3...
+				if(ticket != null && ticket.equals("/bin/sh: p4: command not found")) {
+					login.close();
+					login.exec(new String[] { "/bin/sh", "-c", "echo \"" + depot.getPassword() + "\" | p4 login -p" });
+					reader = login.getReader();
+					while((line = reader.readLine()) != null) {
+						ticket = line;
+					}
+				}
 
 			} catch(IOException e) {
 				throw new PerforceException("Unable to login via p4 login due to IOException: " + e.getMessage());
