@@ -1,9 +1,9 @@
 package com.tek42.perforce.model;
 
 /**
- *
- * @author Mike Wille	
- *
+ * Represents a Perforce Label
+ * 
+ * @author Mike Wille
  */
 public class Label extends AbstractViewsSupport {
 	String name;
@@ -13,7 +13,7 @@ public class Label extends AbstractViewsSupport {
 	String description;
 	String options;
 	String revision;
-	
+
 	public Label() {
 		super();
 		name = "";
@@ -32,7 +32,8 @@ public class Label extends AbstractViewsSupport {
 	}
 
 	/**
-	 * @param name the name to set
+	 * @param name
+	 *            the name to set
 	 */
 	public void setName(String name) {
 		this.name = name;
@@ -46,7 +47,8 @@ public class Label extends AbstractViewsSupport {
 	}
 
 	/**
-	 * @param update the update to set
+	 * @param update
+	 *            the update to set
 	 */
 	public void setUpdate(String update) {
 		this.update = update;
@@ -60,7 +62,8 @@ public class Label extends AbstractViewsSupport {
 	}
 
 	/**
-	 * @param access the access to set
+	 * @param access
+	 *            the access to set
 	 */
 	public void setAccess(String access) {
 		this.access = access;
@@ -74,7 +77,8 @@ public class Label extends AbstractViewsSupport {
 	}
 
 	/**
-	 * @param owner the owner to set
+	 * @param owner
+	 *            the owner to set
 	 */
 	public void setOwner(String owner) {
 		this.owner = owner;
@@ -88,7 +92,8 @@ public class Label extends AbstractViewsSupport {
 	}
 
 	/**
-	 * @param description the description to set
+	 * @param description
+	 *            the description to set
 	 */
 	public void setDescription(String description) {
 		this.description = description;
@@ -102,7 +107,8 @@ public class Label extends AbstractViewsSupport {
 	}
 
 	/**
-	 * @param options the options to set
+	 * @param options
+	 *            the options to set
 	 */
 	public void setOptions(String options) {
 		this.options = options;
@@ -116,11 +122,11 @@ public class Label extends AbstractViewsSupport {
 	}
 
 	/**
-	 * @param revision the revision to set
+	 * @param revision
+	 *            the revision to set
 	 */
 	public void setRevision(String revision) {
 		this.revision = revision;
 	}
 
-	
 }

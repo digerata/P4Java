@@ -20,24 +20,25 @@ import com.tek42.perforce.process.ExecutorFactory;
  * Represents the root object from which to interact with a Perforce server
  * <p>
  * As an example of usage:<br>
- * <pre> 
+ * 
+ * <pre>
+ *  
  * // Setup
  * Depot depot = new Depot();
- * depot.setPort("perforce.com:1666");
- * depot.setUser("username");
- * depot.setPassword("password");
- * depot.setWorkspace("workspace");
+ * depot.setPort(&quot;perforce.com:1666&quot;);
+ * depot.setUser(&quot;username&quot;);
+ * depot.setPassword(&quot;password&quot;);
+ * depot.setWorkspace(&quot;workspace&quot;);
  * 
  * // Test
  * depot.isValid()  // returns true if so 
  * 
  * // Look at the last change for a project...
- * List<Changelist> changes = depot.getChanges().getChangelists("//depot/ProjectName/...", -1, 1);
- * System.out.println(Last Change is: " + changes.get(0));
+ * List&lt;Changelist&gt; changes = depot.getChanges().getChangelists(&quot;//depot/ProjectName/...&quot;, -1, 1);
+ * System.out.println(Last Change is: &quot; + changes.get(0));
  * </pre>
  * 
  * @author Mike Wille
- *
  */
 public class Depot {
 	private static Depot depot;
@@ -49,32 +50,32 @@ public class Depot {
 	private String p4exe;
 	private long threshold;
 	private String p4Ticket;
-	
+
 	ExecutorFactory execFactory;
-	
+
 	private Changes changes;
 	private Workspaces workspaces;
 	private Users users;
 	private Labels labels;
 	private Status status;
-	
+
 	/**
 	 * If not using this in a Dependancy Injection environment, use this method to get ahold of the depot.
-	 *
+	 * 
 	 * @return
 	 */
 	public static Depot getInstance() {
 		if(depot == null) {
 			depot = new Depot();
 		}
-		
+
 		return depot;
 	}
-	
+
 	public Depot() {
 		this(new DefaultExecutorFactory());
 	}
-	
+
 	public Depot(ExecutorFactory factory) {
 		settings = new HashMap<String, String>();
 		settings.put("P4USER", "robot");
@@ -87,13 +88,13 @@ public class Depot {
 		setSystemRoot("C:\\WINDOWS");
 		setExecutable("p4");
 		setServerTimeout(10000);
-		
+
 		String os = System.getProperty("os.name");
-		
+
 		if(null == os) {
 			return;
 		}
-		
+
 		if(os.startsWith("Windows")) {
 			settings.put("PATHEXT", ".COM;.EXE;.BAT;.CMD");
 			String windir = System.getProperty("com.ms.windir");
@@ -104,13 +105,12 @@ public class Depot {
 			}
 		}
 		execFactory = factory;
-		execFactory.setEnv(settings);		
+		execFactory.setEnv(settings);
 	}
-	
+
 	/**
-	 * Ensures that the latest settings are reflected in the ExecutorFactory before
-	 * it is used.
-	 *
+	 * Ensures that the latest settings are reflected in the ExecutorFactory before it is used.
+	 * 
 	 * @return
 	 */
 	public ExecutorFactory getExecFactory() {
@@ -119,15 +119,14 @@ public class Depot {
 		}
 		return execFactory;
 	}
-	
+
 	public Logger getLogger() {
 		return logger;
 	}
-	
+
 	/**
-	 * Obtain a legacy perforce Env object for using legacy API.  Useful if you
-	 * need to leverage a feature not present in com.tek42.perforce but one that does exist
-	 * in com.perforce.api.
+	 * Obtain a legacy perforce Env object for using legacy API. Useful if you need to leverage a feature not present in
+	 * com.tek42.perforce but one that does exist in com.perforce.api.
 	 * 
 	 * @return {@link com.perforce.api.Env} object
 	 */
@@ -140,54 +139,54 @@ public class Depot {
 		env.setPort(getPort());
 		env.setSystemDrive(getSystemDrive());
 		env.setSystemRoot(getSystemRoot());
-		
+
 		return env;
 	}
-	
+
 	/**
 	 * Retrieves the Changes object for interacting with this depot's changelists
-	 *
-	 * @return	Changes object
+	 * 
+	 * @return Changes object
 	 */
 	public Changes getChanges() {
 		if(changes == null)
 			changes = new Changes(this);
 		return changes;
 	}
-	
+
 	/**
 	 * Retrieves the Workspaces object for interacting with this depot's workspaces
-	 *
+	 * 
 	 * @return Workspaces object
-	 */	
+	 */
 	public Workspaces getWorkspaces() {
 		if(workspaces == null)
 			workspaces = new Workspaces(this);
 		return workspaces;
 	}
-	
+
 	/**
 	 * Retrieves the Users object for interacting with this depot's users.
-	 *
-	 * @return	Users object
+	 * 
+	 * @return Users object
 	 */
 	public Users getUsers() {
 		if(users == null)
 			users = new Users(this);
 		return users;
 	}
-	
+
 	/**
 	 * Retrieves the labels object for interacting with this depot's labels.
-	 *
-	 * @return	Labels object
+	 * 
+	 * @return Labels object
 	 */
 	public Labels getLabels() {
 		if(labels == null)
 			labels = new Labels(this);
 		return labels;
 	}
-	
+
 	/**
 	 * Retrieves the status object for interacting with the depot's status.
 	 * <p>
@@ -200,15 +199,15 @@ public class Depot {
 			status = new Status(this);
 		return status;
 	}
-	
+
 	/**
 	 * Returns the output created by "p4 info"
-	 *
-	 * @return	The string output of p4 info
+	 * 
+	 * @return The string output of p4 info
 	 */
 	public String info() throws Exception {
 		Executor p4 = getExecFactory().newExecutor();
-		String cmd[] = {"p4", "info" };
+		String cmd[] = { "p4", "info" };
 		p4.exec(cmd);
 		StringBuilder sb = new StringBuilder();
 		String line;
@@ -217,21 +216,20 @@ public class Depot {
 		}
 		return sb.toString();
 	}
-	
+
 	/**
 	 * Gets a property specified by key
-	 *
+	 * 
 	 * @param key
 	 * @return
 	 */
 	public String getProperty(String key) {
 		return settings.get(key);
 	}
-	
+
 	/**
-	 * Gets a value specified by key.  If the value is empty, it will return
-	 * the specified default.
-	 *
+	 * Gets a value specified by key. If the value is empty, it will return the specified default.
+	 * 
 	 * @param key
 	 * @param def
 	 * @return
@@ -242,7 +240,7 @@ public class Depot {
 			return def;
 		return value;
 	}
-	
+
 	/**
 	 * Sets the P4USER in the class information.
 	 * 
@@ -258,7 +256,7 @@ public class Depot {
 
 	/**
 	 * Returns the P4USER.
-	 *
+	 * 
 	 * @return
 	 */
 	public String getUser() {
@@ -280,7 +278,7 @@ public class Depot {
 
 	/**
 	 * Returns the P4CLIENT.
-	 *
+	 * 
 	 * @return
 	 */
 	public String getClient() {
@@ -302,7 +300,7 @@ public class Depot {
 
 	/**
 	 * Returns the P4PORT.
-	 *
+	 * 
 	 * @return
 	 */
 	public String getPort() {
@@ -324,7 +322,7 @@ public class Depot {
 
 	/**
 	 * Returns the P4PASSWORD.
-	 *
+	 * 
 	 * @return
 	 */
 	public String getPassword() {
@@ -345,8 +343,8 @@ public class Depot {
 	}
 
 	/**
-	 * Append the path element to the existing path. If the path element given
-	 * is already in the path, no change is made.
+	 * Append the path element to the existing path. If the path element given is already in the path, no change is
+	 * made.
 	 * 
 	 * @param path
 	 *            the path element to be appended.
@@ -375,7 +373,7 @@ public class Depot {
 
 	/**
 	 * Returns the path
-	 *
+	 * 
 	 * @return
 	 */
 	public String getPath() {
@@ -383,8 +381,7 @@ public class Depot {
 	}
 
 	/**
-	 * Sets the SystemDrive in the class information. This is only meaningful
-	 * under Windows.
+	 * Sets the SystemDrive in the class information. This is only meaningful under Windows.
 	 * 
 	 * @param user
 	 *            SystemDrive value.
@@ -395,10 +392,10 @@ public class Depot {
 		settings.put("SystemDrive", drive);
 		validEnvp = false;
 	}
-	
+
 	/**
 	 * Returns the system drive
-	 *
+	 * 
 	 * @return
 	 */
 	public String getSystemDrive() {
@@ -406,8 +403,7 @@ public class Depot {
 	}
 
 	/**
-	 * Sets the SystemRoot in the class information. This is only meaningful
-	 * under Windows.
+	 * Sets the SystemRoot in the class information. This is only meaningful under Windows.
 	 * 
 	 * @param user
 	 *            SystemRoot value.
@@ -421,17 +417,16 @@ public class Depot {
 
 	/**
 	 * Returns the system root.
-	 *
+	 * 
 	 * @return
 	 */
 	public String getSystemRoot() {
 		return settings.get("SystemRoot");
 	}
-	
+
 	/**
-	 * Sets up the path to reach the p4 executable. The full path passed in must
-	 * contain the executable or at least end in the system's file separator
-	 * character. This gotten from the file.separator property. For example:
+	 * Sets up the path to reach the p4 executable. The full path passed in must contain the executable or at least end
+	 * in the system's file separator character. This gotten from the file.separator property. For example:
 	 * 
 	 * <pre>
 	 * p4.executable=/usr/bin/p4   # This will work
@@ -461,7 +456,7 @@ public class Depot {
 
 	/**
 	 * Returns the path to the executable.
-	 *
+	 * 
 	 * @return
 	 */
 	public String getExecutable() {
@@ -470,7 +465,7 @@ public class Depot {
 
 	/**
 	 * Set the server timeout threshold.
-	 *
+	 * 
 	 * @param threshold
 	 */
 	public void setServerTimeout(long threshold) {
@@ -479,7 +474,7 @@ public class Depot {
 
 	/**
 	 * Return the server timeout threshold.
-	 *
+	 * 
 	 * @return
 	 */
 	public long getServerTimeout() {
@@ -496,14 +491,14 @@ public class Depot {
 	}
 
 	/**
-	 * If using tickets, set the value of the ticket for this depot's user.
-	 * Example value would be: 875477B92937E4AF7B20C5234C8905E2
+	 * If using tickets, set the value of the ticket for this depot's user. Example value would be:
+	 * 875477B92937E4AF7B20C5234C8905E2
 	 * 
-	 * @param ticket the p4Ticket to set
+	 * @param ticket
+	 *            the p4Ticket to set
 	 */
 	public void setP4Ticket(String ticket) {
 		p4Ticket = ticket;
 	}
 
-	
 }

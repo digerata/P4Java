@@ -3,9 +3,8 @@ package com.tek42.perforce.model;
 /**
  * Represents a Perforce clientspec or workspace.
  * <p>
- * This is necessary because the Client class that Perforce provides in their
- * API is not complete. It is missing several fields and we cannot extend that
- * class because its final.
+ * This is necessary because the Client class that Perforce provides in their API is not complete. It is missing several
+ * fields and we cannot extend that class because its final.
  * 
  * @author Mike Wille
  */
@@ -21,7 +20,7 @@ public class Workspace extends AbstractViewsSupport {
 	String submitOptions;
 	String update;
 	String access;
-	
+
 	public Workspace() {
 		super();
 		this.name = "";
@@ -36,7 +35,7 @@ public class Workspace extends AbstractViewsSupport {
 		this.update = "";
 		this.access = "";
 	}
-	
+
 	public String toString() {
 		StringBuilder sb = new StringBuilder();
 		sb.append("[Client]\n");
@@ -55,7 +54,7 @@ public class Workspace extends AbstractViewsSupport {
 		for(String view : views) {
 			sb.append("\t" + view + "\n");
 		}
-		
+
 		return sb.toString();
 	}
 
@@ -187,7 +186,8 @@ public class Workspace extends AbstractViewsSupport {
 	}
 
 	/**
-	 * @param submitOptions the submitOptions to set
+	 * @param submitOptions
+	 *            the submitOptions to set
 	 */
 	public void setSubmitOptions(String submitOptions) {
 		this.submitOptions = submitOptions;
@@ -201,7 +201,8 @@ public class Workspace extends AbstractViewsSupport {
 	}
 
 	/**
-	 * @param update the update to set
+	 * @param update
+	 *            the update to set
 	 */
 	public void setUpdate(String update) {
 		this.update = update;
@@ -215,10 +216,11 @@ public class Workspace extends AbstractViewsSupport {
 	}
 
 	/**
-	 * @param access the access to set
+	 * @param access
+	 *            the access to set
 	 */
 	public void setAccess(String access) {
 		this.access = access;
 	}
-	
+
 }

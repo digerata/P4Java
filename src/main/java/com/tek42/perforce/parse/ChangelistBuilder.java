@@ -16,17 +16,18 @@ import com.tek42.perforce.model.Changelist;
 /**
  * Responsible for building and saving changelists.
  * 
- * @author Michael Wille
- *
+ * @author Mike Wille
  */
 public class ChangelistBuilder implements Builder<Changelist> {
 	private final Logger logger = LoggerFactory.getLogger("perforce");
-	
+
 	public String[] getBuildCmd(String id) {
 		return new String[] { "p4", "describe", "-s", id };
 	}
-	
-	/* (non-Javadoc)
+
+	/*
+	 * (non-Javadoc)
+	 * 
 	 * @see com.tek42.perforce.parse.Builder#build(java.lang.StringBuilder)
 	 */
 	public Changelist build(StringBuilder sb) throws PerforceException {
@@ -36,10 +37,10 @@ public class ChangelistBuilder implements Builder<Changelist> {
 			while(lines.hasMoreElements()) {
 				String line = lines.nextToken();
 				logger.debug("Line: " + line);
-				
+
 				if(line.startsWith("Change")) {
 					logger.debug("New changelist.");
-					
+
 					change = new Changelist();
 					// Line looks like:
 					// Change XXXX by user@client on YYYY/MM/DD HH:MM:SS
@@ -51,12 +52,12 @@ public class ChangelistBuilder implements Builder<Changelist> {
 					change.setUser(user.substring(0, user.indexOf("@")));
 					change.setWorkspace(user.substring(user.indexOf("@") + 1));
 					details.nextToken(); // on
-					
+
 					String date = details.nextToken();
 					String time = details.nextToken();
-					
+
 					change.setDate(parseDate(date + " " + time));
-					
+
 					// the lines immediately following is the description
 					String desc = "";
 					line = lines.nextToken();
@@ -64,11 +65,11 @@ public class ChangelistBuilder implements Builder<Changelist> {
 						logger.debug("Description Line: " + line);
 						desc += line + "\n";
 						line = lines.nextToken();
-					} 
+					}
 					change.setDescription(desc.trim());
-					
+
 				}
-				 
+
 				if(line.startsWith("Jobs fixed")) {
 					logger.debug("Has jobs.");
 					List<Changelist.JobEntry> jobs = new ArrayList<Changelist.JobEntry>();
@@ -77,7 +78,7 @@ public class ChangelistBuilder implements Builder<Changelist> {
 					String description = null;
 					do {
 						line = lines.nextToken();
-						logger.debug("Job Line: "+ line);
+						logger.debug("Job Line: " + line);
 						if(!getDesc) {
 							// Line looks like:
 							// EXT-84 on 2007/09/25 by mwille *closed*
@@ -103,25 +104,25 @@ public class ChangelistBuilder implements Builder<Changelist> {
 							jobs.add(job);
 							getDesc = false;
 						}
-						
+
 					} while(!line.startsWith("Affected files"));
-					
+
 					change.setJobs(jobs);
-					
+
 				}
-				
+
 				if(line.startsWith("Affected files")) {
 					logger.debug("reading files...");
 					List<Changelist.FileEntry> files = new ArrayList<Changelist.FileEntry>();
-					
+
 					while(lines.hasMoreElements()) {
 						String entry = lines.nextToken();
 						logger.debug("File Line: " + entry);
-						//if(!entry.startsWith("..."))
-						//	break;
+						// if(!entry.startsWith("..."))
+						// break;
 						// line looks lie:
 						// ... //depot/path/to/file/file.ext#1 edit
-						
+
 						int revStart = entry.indexOf("#");
 						String filename = entry.substring(4, revStart);
 						String rev = entry.substring(revStart + 1, entry.indexOf(" ", revStart));
@@ -132,9 +133,9 @@ public class ChangelistBuilder implements Builder<Changelist> {
 						file.setAction(Changelist.FileEntry.Action.valueOf(action.toUpperCase()));
 						files.add(file);
 					}
-					
+
 					change.setFiles(files);
-	
+
 				}
 			}
 		} catch(Exception e) {
@@ -143,52 +144,52 @@ public class ChangelistBuilder implements Builder<Changelist> {
 		}
 		return change;
 	}
-	
-	
 
 	public String[] getSaveCmd() {
 		return new String[] { "p4", "change", "-i" };
 	}
 
-	/* (non-Javadoc)
+	/*
+	 * (non-Javadoc)
+	 * 
 	 * @see com.tek42.perforce.parse.Builder#save(java.lang.Object)
 	 */
 	public void save(Changelist obj, Writer out) throws PerforceException {
-		throw new UnsupportedOperationException("This is not implemented."); 
+		throw new UnsupportedOperationException("This is not implemented.");
 	}
-	
+
 	/**
-	 * Returns a java.util.Date object set to the time specified in newDate.  The format
-	 * expected is the format of: YYYY-MM-DD HH:MM:SS
+	 * Returns a java.util.Date object set to the time specified in newDate. The format expected is the format of:
+	 * YYYY-MM-DD HH:MM:SS
 	 * 
-	 * @param	newDate the string date to convert
-	 * @return	A java.util.Date based off of the string format.
+	 * @param newDate
+	 *            the string date to convert
+	 * @return A java.util.Date based off of the string format.
 	 */
 	public static java.util.Date parseDate(String newDate) {
 		// when we have a null from the database, give it zeros first.
 		if(newDate == null || newDate.equals("")) {
 			return null;
 		}
-		
+
 		String parts[] = newDate.split(" ");
 		String date[] = parts[0].split("/");
 		String time[] = null;
-		
+
 		if(parts.length > 1) {
 			time = parts[1].split(":");
 			time[2] = time[2].replaceAll("\\.0", "");
 		} else {
 			time = "00:00:00".split(":");
 		}
-		
+
 		GregorianCalendar cal = (GregorianCalendar) Calendar.getInstance();
 		cal.clear();
-		
-		cal.set(new Integer(date[0]).intValue(), (new Integer(date[1]).intValue() - 1), 
-				new Integer(date[2]).intValue(), new Integer(time[0]).intValue(), 
-				new Integer(time[1]).intValue(), new Integer(time[2]).intValue());
-		
-		return cal.getTime();		
+
+		cal.set(new Integer(date[0]).intValue(), (new Integer(date[1]).intValue() - 1), new Integer(date[2]).intValue(), new Integer(
+				time[0]).intValue(), new Integer(time[1]).intValue(), new Integer(time[2]).intValue());
+
+		return cal.getTime();
 	}
-	
+
 }

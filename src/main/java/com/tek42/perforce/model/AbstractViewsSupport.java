@@ -7,11 +7,10 @@ import java.util.ArrayList;
  * Provide base support for views.
  * 
  * @author Mike Wille
- *
  */
 public abstract class AbstractViewsSupport {
 	protected List<String> views;
-	
+
 	public AbstractViewsSupport() {
 		views = new ArrayList<String>();
 	}
@@ -24,9 +23,8 @@ public abstract class AbstractViewsSupport {
 	}
 
 	/**
-	 * Returns the list of views concatenated together with \n
-	 * as delimeters.
-	 *
+	 * Returns the list of views concatenated together with \n as delimeters.
+	 * 
 	 * @return
 	 */
 	public String getViewsAsString() {
@@ -36,7 +34,7 @@ public abstract class AbstractViewsSupport {
 		}
 		return sb.toString();
 	}
-	
+
 	/**
 	 * @param view
 	 *            the view to set

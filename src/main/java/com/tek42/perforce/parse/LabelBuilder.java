@@ -10,12 +10,13 @@ import com.tek42.perforce.model.Label;
 /**
  * Responsible for building and saving labels.
  * 
- * @author mwille
- *
+ * @author Mike Wille
  */
 public class LabelBuilder extends AbstractFormBuilder<Label> {
 
-	/* (non-Javadoc)
+	/*
+	 * (non-Javadoc)
+	 * 
 	 * @see com.tek42.perforce.parse.AbstractFormBuilder#buildForm(java.util.Map)
 	 */
 	@Override
@@ -35,21 +36,27 @@ public class LabelBuilder extends AbstractFormBuilder<Label> {
 		return label;
 	}
 
-	/* (non-Javadoc)
+	/*
+	 * (non-Javadoc)
+	 * 
 	 * @see com.tek42.perforce.parse.Builder#getBuildCmd(java.lang.String)
 	 */
 	public String[] getBuildCmd(String id) {
 		return new String[] { "p4", "label", "-o", id };
 	}
 
-	/* (non-Javadoc)
+	/*
+	 * (non-Javadoc)
+	 * 
 	 * @see com.tek42.perforce.parse.Builder#getSaveCmd()
 	 */
 	public String[] getSaveCmd() {
 		return new String[] { "p4", "-s", "label", "-i" };
 	}
 
-	/* (non-Javadoc)
+	/*
+	 * (non-Javadoc)
+	 * 
 	 * @see com.tek42.perforce.parse.Builder#save(java.lang.Object, java.io.Writer)
 	 */
 	public void save(Label label, Writer writer) throws PerforceException {

@@ -11,10 +11,9 @@ import org.slf4j.LoggerFactory;
 import com.tek42.perforce.PerforceException;
 
 /**
- * Executes on the command line.  This is not thread safe.
+ * Executes on the command line. This is not thread safe.
  * 
  * @author Mike Wille
- *
  */
 public class CmdLineExecutor implements Executor {
 	ProcessBuilder builder;
@@ -23,7 +22,7 @@ public class CmdLineExecutor implements Executor {
 	BufferedWriter writer;
 	BufferedReader reader;
 	private final Logger logger = LoggerFactory.getLogger("perforce");
-	
+
 	/**
 	 * Requires a map of environment variables (P4USER, P4CLIENT, P4PORT, etc)
 	 * 
@@ -34,14 +33,16 @@ public class CmdLineExecutor implements Executor {
 		builder = new ProcessBuilder(args);
 		Map<String, String> env = builder.environment();
 		for(String key : environment.keySet()) {
-			//if(key.equals("P4PASSWD"))
-				//continue;
-			//logger.warn("Settin env: " + key + " = " + environment.get(key));
+			// if(key.equals("P4PASSWD"))
+			// continue;
+			// logger.warn("Settin env: " + key + " = " + environment.get(key));
 			env.put(key, environment.get(key));
 		}
 	}
-	
-	/* (non-Javadoc)
+
+	/*
+	 * (non-Javadoc)
+	 * 
 	 * @see com.tek42.perforce.process.P4Executor#exec(java.lang.String[])
 	 */
 	public void exec(String[] args) throws PerforceException {
@@ -57,28 +58,33 @@ public class CmdLineExecutor implements Executor {
 			currentProcess = builder.start();
 			reader = new BufferedReader(new InputStreamReader(currentProcess.getInputStream()));
 			writer = new BufferedWriter(new OutputStreamWriter(currentProcess.getOutputStream()));
-			
+
 		} catch(IOException e) {
 			throw new PerforceException("Failed to open connection to: " + args[0], e);
 		}
 	}
 
-	/* (non-Javadoc)
+	/*
+	 * (non-Javadoc)
+	 * 
 	 * @see com.tek42.perforce.process.P4Executor#getReader()
 	 */
 	public BufferedReader getReader() {
 		return reader;
 	}
 
-	/* (non-Javadoc)
+	/*
+	 * (non-Javadoc)
+	 * 
 	 * @see com.tek42.perforce.process.P4Executor#getWriter()
 	 */
 	public BufferedWriter getWriter() {
 		return writer;
 	}
-	
-	
-	/* (non-Javadoc)
+
+	/*
+	 * (non-Javadoc)
+	 * 
 	 * @see com.tek42.perforce.process.P4Executor#close()
 	 */
 	public void close() {
@@ -87,19 +93,21 @@ public class CmdLineExecutor implements Executor {
 				reader.close();
 			}
 			reader = null;
-		} catch(IOException e) { }
-		
+		} catch(IOException e) {
+		}
+
 		try {
 			if(writer != null) {
 				writer.close();
 			}
 			writer = null;
-		} catch(IOException e) { }
+		} catch(IOException e) {
+		}
 	}
 
 	/**
-	 * Useful for things like process.waitFor(). 
-	 *
+	 * Useful for things like process.waitFor().
+	 * 
 	 * @return
 	 */
 	public Process getProcess() {

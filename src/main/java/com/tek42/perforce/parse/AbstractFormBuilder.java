@@ -11,19 +11,20 @@ import org.slf4j.LoggerFactory;
 import com.tek42.perforce.PerforceException;
 
 /**
- * Abstract class that parses the stringbuilder into key/value pairs and then
- * sends them to a abstract method responsible for building the object.  If you extend this
- * class, you do NOT override build(StringBuilder) but buildForm(Map).
+ * Abstract class that parses the stringbuilder into key/value pairs and then sends them to a abstract method
+ * responsible for building the object. If you extend this class, you do NOT override build(StringBuilder) but
+ * buildForm(Map).
  * <p>
- * Useful for all perforce objects that are editable via forms.  i.e., User, Workspace, Jobspec, etc.
- *  
+ * Useful for all perforce objects that are editable via forms. i.e., User, Workspace, Jobspec, etc.
+ * 
  * @author Mike Wille
- *
  */
 public abstract class AbstractFormBuilder<T> implements Builder<T> {
 	private final Logger logger = LoggerFactory.getLogger("perforce");
-	
-	/* (non-Javadoc)
+
+	/*
+	 * (non-Javadoc)
+	 * 
 	 * @see com.tek42.perforce.parse.Builder#build(java.lang.StringBuilder)
 	 */
 	public T build(StringBuilder sb) throws PerforceException {
@@ -44,9 +45,8 @@ public abstract class AbstractFormBuilder<T> implements Builder<T> {
 	}
 
 	/**
-	 * Test for null and returns an empty string if the key is not present.  Otherwise,
-	 * returns the value.
-	 *
+	 * Test for null and returns an empty string if the key is not present. Otherwise, returns the value.
+	 * 
 	 * @param key
 	 * @param fields
 	 * @return
@@ -55,13 +55,13 @@ public abstract class AbstractFormBuilder<T> implements Builder<T> {
 		String value = fields.get(key);
 		if(value == null)
 			return "";
-		
+
 		return value;
 	}
-	
+
 	/**
 	 * Should return a new object set with the data from fields.
-	 *
+	 * 
 	 * @param fields
 	 * @return
 	 * @throws PerforceException
