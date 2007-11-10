@@ -17,6 +17,7 @@ import com.tek42.perforce.model.Workspace;
  */
 public class WorkspaceTest extends PropertySupport {
 	Depot depot;
+	static String ticket;
 	/**
 	 *
 	 * @throws java.lang.Exception
@@ -28,6 +29,7 @@ public class WorkspaceTest extends PropertySupport {
 		depot.setUser(getProperty("p4.user"));
 		depot.setPassword(getProperty("p4.passwd"));
 		depot.setClient(getProperty("p4.client"));
+		depot.setP4Ticket(ticket);
 	}
 
 	/**
@@ -37,6 +39,8 @@ public class WorkspaceTest extends PropertySupport {
 	public void testGetWorkspace() throws Exception {
 		Workspace workspace = depot.getWorkspaces().getWorkspace(getProperty("ws.existingname"));
 		System.out.println("Have workspace: \n" + workspace);
+		// work around for saving to depot not authenticating first.  I KNOW. I KNOW.
+		ticket = depot.getP4Ticket();
 	}
 	
 	@Test
