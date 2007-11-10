@@ -265,11 +265,15 @@ public abstract class AbstractPerforceTemplate {
 					ticket = line;
 				}
 				
-				// Strange error under Unit Testing, though I don't believe it exists outside of
-				// the build environment, I still want to be able to test security level 3...
+				// Strange error under hudson's execution of unit tests.  It appears
+				// that the environment is not setup correctly from within hudson.  The sh shell
+				// cannot find the p4 executable.  So we'll try again with a hard coded path.
+				// Though, I don't believe this problem exists outside of the build environment, 
+				// and wouldn't normally worry, I still want to be able to test security level 3
+				// from the automated build...
 				if(ticket != null && ticket.equals("/bin/sh: p4: command not found")) {
 					login.close();
-					login.exec(new String[] { "/bin/sh", "-c", "echo \"" + depot.getPassword() + "\" | p4 login -p" });
+					login.exec(new String[] { "/bin/sh", "-c", "echo \"" + depot.getPassword() + "\" | /usr/bin/p4 login -p" });
 					reader = login.getReader();
 					while((line = reader.readLine()) != null) {
 						ticket = line;
