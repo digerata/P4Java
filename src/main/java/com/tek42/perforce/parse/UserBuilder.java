@@ -7,7 +7,7 @@ import com.tek42.perforce.PerforceException;
 import com.tek42.perforce.model.User;
 
 /**
- * Responsible for building and saving user objects
+ * Responsible for building and saving user objects.
  * 
  * @author Mike Wille
  */

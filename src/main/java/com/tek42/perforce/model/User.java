@@ -1,7 +1,7 @@
 package com.tek42.perforce.model;
 
 /**
- * Represents a user in perforce
+ * Represents a user in perforce.
  * 
  * @author Mike Wille
  */

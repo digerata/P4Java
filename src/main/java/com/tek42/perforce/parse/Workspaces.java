@@ -5,7 +5,7 @@ import com.tek42.perforce.PerforceException;
 import com.tek42.perforce.model.Workspace;
 
 /**
- * Base API object for interacting with workspaces
+ * Base API object for interacting with workspaces.
  * 
  * @author Mike Wille
  */

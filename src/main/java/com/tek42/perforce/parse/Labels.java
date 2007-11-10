@@ -8,7 +8,7 @@ import com.tek42.perforce.PerforceException;
 import com.tek42.perforce.model.Label;
 
 /**
- * Base API object for interacting with labels
+ * Base API object for interacting with labels.
  * 
  * @author Mike Wille
  */

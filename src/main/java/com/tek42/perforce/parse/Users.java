@@ -4,7 +4,7 @@ import com.tek42.perforce.Depot;
 import com.tek42.perforce.model.User;
 
 /**
- * Base API object for interacting with users
+ * Base API object for interacting with users.
  * 
  * @author Mike Wille
  */

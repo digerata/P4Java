@@ -12,7 +12,7 @@ import com.tek42.perforce.PerforceException;
 import com.tek42.perforce.model.Changelist;
 
 /**
- * Base API object for interacting with changelists
+ * Base API object for interacting with changelists.
  * 
  * @author Mike Wille
  * @author Brian Westrich

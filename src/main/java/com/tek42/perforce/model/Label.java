@@ -1,7 +1,7 @@
 package com.tek42.perforce.model;
 
 /**
- * Represents a Perforce Label
+ * Represents a Perforce Label.
  * 
  * @author Mike Wille
  */

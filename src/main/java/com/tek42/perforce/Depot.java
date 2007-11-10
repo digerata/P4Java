@@ -17,7 +17,7 @@ import com.tek42.perforce.process.Executor;
 import com.tek42.perforce.process.ExecutorFactory;
 
 /**
- * Represents the root object from which to interact with a Perforce server
+ * Represents the root object from which to interact with a Perforce server.
  * <p>
  * As an example of usage:<br>
  * 
@@ -260,7 +260,7 @@ public class Depot {
 	 * @return
 	 */
 	public String getUser() {
-		return (String) settings.get("P4USER");
+		return settings.get("P4USER");
 	}
 
 	/**
@@ -282,7 +282,7 @@ public class Depot {
 	 * @return
 	 */
 	public String getClient() {
-		return (String) settings.get("P4CLIENT");
+		return settings.get("P4CLIENT");
 	}
 
 	/**
@@ -304,7 +304,7 @@ public class Depot {
 	 * @return
 	 */
 	public String getPort() {
-		return (String) settings.get("P4PORT");
+		return settings.get("P4PORT");
 	}
 
 	/**
@@ -326,7 +326,7 @@ public class Depot {
 	 * @return
 	 */
 	public String getPassword() {
-		return (String) settings.get("P4PASSWD");
+		return settings.get("P4PASSWD");
 	}
 
 	/**
@@ -361,7 +361,7 @@ public class Depot {
 		StringTokenizer st = new StringTokenizer(origPath, pathSep);
 		StringBuffer sb = new StringBuffer();
 		while(st.hasMoreTokens()) {
-			tok = (String) st.nextToken();
+			tok = st.nextToken();
 			if(tok.equals(path))
 				return;
 			sb.append(tok);
@@ -377,7 +377,7 @@ public class Depot {
 	 * @return
 	 */
 	public String getPath() {
-		return (String) settings.get("PATH");
+		return settings.get("PATH");
 	}
 
 	/**

@@ -4,7 +4,7 @@ import com.tek42.perforce.Depot;
 import com.tek42.perforce.PerforceException;
 
 /**
- * Allows checking the status of the depot
+ * Allows checking the status of the depot.
  * 
  * @author Mike Wille
  */
