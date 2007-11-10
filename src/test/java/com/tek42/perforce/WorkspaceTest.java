@@ -40,7 +40,7 @@ public class WorkspaceTest extends PropertySupport {
 	}
 	
 	@Test
-	public void testCreateWorkspace() throws Exception {
+	public void testMyCreateWorkspace() throws Exception {
 		Workspace workspace = new Workspace();
 		String name = getProperty("ws.name");
 		workspace.setName(name);
