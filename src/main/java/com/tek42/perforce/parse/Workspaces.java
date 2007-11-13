@@ -64,6 +64,9 @@ public class Workspaces extends AbstractPerforceTemplate {
 	 * @throws PerforceException
 	 */
 	public StringBuilder syncToHead(String path, boolean forceSync) throws PerforceException {
+		if(!path.endsWith("#head")) {
+			path += "#head";
+		}
 		if(forceSync)
 			return getPerforceResponse(new String[] { "p4", "sync", "-f", path });
 		else
