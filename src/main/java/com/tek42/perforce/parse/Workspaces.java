@@ -42,7 +42,8 @@ public class Workspaces extends AbstractPerforceTemplate {
 	}
 
 	/**
-	 * Synchronizes to the latest change for the specified path.
+	 * Synchronizes to the latest change for the specified path.  Convenience function
+	 * for {@see syncTo(String, boolean)}
 	 * 
 	 * @param path
 	 * @return
@@ -67,6 +68,24 @@ public class Workspaces extends AbstractPerforceTemplate {
 		if(!path.endsWith("#head")) {
 			path += "#head";
 		}
+		return syncTo(path, forceSync);
+	}
+	
+	/**
+	 * Provides method to sync to a depot path and allows for any revision, changelist, label, etc.
+	 * to be appended to the path.
+	 * <p>
+	 * A force sync can be specified by passing true to forceSync.
+	 * 
+	 * @param path
+	 * 				The depot path to sync to.  Perforce suffix for [revRange] is allowed.
+	 * @param forceSync
+	 * 				Should we force a sync to grab all files regardless of version on disk?
+	 * @return
+	 * 			A StringBuilder that contains the output of the p4 execution.
+	 * @throws PerforceException
+	 */
+	public StringBuilder syncTo(String path, boolean forceSync) throws PerforceException {
 		if(forceSync)
 			return getPerforceResponse(new String[] { "p4", "sync", "-f", path });
 		else

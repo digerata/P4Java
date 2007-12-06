@@ -1,8 +1,8 @@
 package com.tek42.perforce;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.*;
 
+import java.io.*;
 import java.util.Date;
 
 import org.junit.Before;
@@ -98,6 +98,32 @@ public class WorkspaceTest extends PropertySupport {
 		assertEquals(getProperty("ws.update.root"), workspace.getRoot());
 		assertEquals(getProperty("ws.update.view") + "\n", workspace.getViewsAsString());
 		assertEquals(desc, workspace.getDescription());
+		
+	}
+	
+	@Test
+	public void testSyncToLabel() throws Exception {
+		Workspace workspace = depot.getWorkspaces().getWorkspace(getProperty("p4.client"));
+		File dir = new File(workspace.getRoot());
+		if(!dir.exists()) {
+			dir.mkdirs();
+		}
+		StringBuilder sb = depot.getWorkspaces().syncTo(getProperty("changelist.project") + "@TestLabel", true);
+		System.out.println(sb);
+		File test = new File(dir.getAbsolutePath() + "/" + getProjectFolder(getProperty("changelist.project")) + "/project-file.txt");
+		System.out.println("Checking for file: " + test.getAbsolutePath());
+		assertTrue(test.exists());
+	}
+	
+	/**
+	 * Test properties only has a depot path, we'll fix that here...
+	 * @param depotPath
+	 * @return
+	 */
+	private String getProjectFolder(String depotPath) {
+		depotPath = depotPath.substring(7);
+		depotPath = depotPath.replaceAll("/\\.\\.\\.", "");
+		return depotPath;
 		
 	}
 }
