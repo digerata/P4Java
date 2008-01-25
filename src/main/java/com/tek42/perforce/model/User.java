@@ -5,7 +5,8 @@ package com.tek42.perforce.model;
  * 
  * @author Mike Wille
  */
-public class User {
+public class User implements java.io.Serializable {
+	
 	String username;
 	String email;
 	String fullName;

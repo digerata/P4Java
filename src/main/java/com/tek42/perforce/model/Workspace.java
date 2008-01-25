@@ -8,7 +8,7 @@ package com.tek42.perforce.model;
  * 
  * @author Mike Wille
  */
-public class Workspace extends AbstractViewsSupport {
+public class Workspace extends AbstractViewsSupport implements java.io.Serializable {
 	String name;
 	String owner;
 	String host;
@@ -36,6 +36,7 @@ public class Workspace extends AbstractViewsSupport {
 		this.access = "";
 	}
 
+	@Override
 	public String toString() {
 		StringBuilder sb = new StringBuilder();
 		sb.append("[Client]\n");

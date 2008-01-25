@@ -118,13 +118,15 @@ public class ChangelistBuilder implements Builder<Changelist> {
 
 					while(lines.hasMoreElements()) {
 						String entry = lines.nextToken();
-						logger.debug("File Line: " + entry);
+						logger.warn("File Line: " + entry);
 						// if(!entry.startsWith("..."))
 						// break;
 						// line looks lie:
 						// ... //depot/path/to/file/file.ext#1 edit
 
 						int revStart = entry.indexOf("#");
+						if(revStart < 0)
+							continue;
 						String filename = entry.substring(4, revStart);
 						String rev = entry.substring(revStart + 1, entry.indexOf(" ", revStart));
 						String action = entry.substring(entry.indexOf(" ", revStart) + 1);

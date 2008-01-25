@@ -15,7 +15,7 @@ import java.util.ArrayList;
  * 
  * @author Mike Wille
  */
-public class Changelist {
+public class Changelist implements java.io.Serializable {
 	int changeNumber;
 	String workspace;
 	Date date;
@@ -57,10 +57,10 @@ public class Changelist {
 	 * 
 	 * @author Mike Wille
 	 */
-	public static class FileEntry {
+	public static class FileEntry implements java.io.Serializable {
 		public static enum Action {
-			ADD, EDIT, DELETE, INTEGRATE, BRANCH
-		};
+			ADD, EDIT, DELETE, INTEGRATE, BRANCH, PURGE
+		}
 
 		Action action;
 		String filename;
@@ -123,7 +123,7 @@ public class Changelist {
 	 * 
 	 * @author Mike Wille
 	 */
-	public static class JobEntry {
+	public static class JobEntry implements java.io.Serializable {
 		String status;
 		String job;
 		String description;

@@ -5,7 +5,7 @@ package com.tek42.perforce.model;
  * 
  * @author Mike Wille
  */
-public class Label extends AbstractViewsSupport {
+public class Label extends AbstractViewsSupport implements java.io.Serializable {
 	String name;
 	String update;
 	String access;

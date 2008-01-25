@@ -8,7 +8,7 @@ import java.util.ArrayList;
  * 
  * @author Mike Wille
  */
-public abstract class AbstractViewsSupport {
+public abstract class AbstractViewsSupport implements java.io.Serializable {
 	protected List<String> views;
 
 	public AbstractViewsSupport() {
