@@ -24,7 +24,6 @@
  *			Suite 1110
  *			Troy, MI 48084
  */
-@2
 package com.tek42.perforce.parse;
 
 import java.util.*;
