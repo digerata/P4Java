@@ -1,7 +1,33 @@
+/*
+ *	P4Java - java integration with Perforce SCM
+ *	Copyright (C) 2007-,  Mike Wille, Tek42
+ *
+ *	This library is free software; you can redistribute it and/or
+ *	modify it under the terms of the GNU Lesser General Public
+ *	License as published by the Free Software Foundation; either
+ *	version 2.1 of the License, or (at your option) any later version.
+ *
+ *	This library is distributed in the hope that it will be useful,
+ *	but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *	MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+ *	Lesser General Public License for more details.
+ *
+ *	You should have received a copy of the GNU Lesser General Public
+ *	License along with this library; if not, write to the Free Software
+ *	Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
+ *
+ *	You can contact the author at:
+ *
+ *	Web:	http://tek42.com
+ *	Email:	mike@tek42.com
+ *	Mail:	755 W Big Beaver Road
+ *			Suite 1110
+ *			Troy, MI 48084
+ */
+@2
 package com.tek42.perforce.parse;
 
-import java.util.HashMap;
-import java.util.Map;
+import java.util.*;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -57,6 +83,25 @@ public abstract class AbstractFormBuilder<T> implements Builder<T> {
 			return "";
 
 		return value;
+	}
+
+	/**
+	 * Like getField(String, Map) except that it assumes the value of the field is a String containing a
+	 * delimited list of values.  It parses the string into a string list.  Assumes new line as separator.
+	 * @param key	The name of the field.
+	 * @param fields	The map of field/value pairs.
+	 * @return	A List of strings.
+	 */
+	protected List<String> getFieldAsList(String key, Map<String, String> fields) {
+		String value = fields.get(key);
+		if(value == null || value.equals("") || value.equals("\n"))
+			return new ArrayList<String>();
+
+		String values[] = value.split("\\n");
+
+		List<String> list = new ArrayList<String>(values.length);
+		list.addAll(Arrays.asList(values));
+		return list;
 	}
 
 	/**

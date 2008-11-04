@@ -27,4 +27,21 @@ public class ChangelistBuilderTest extends TestCase {
 		System.out.println("Changelist: " + c);
 	}
 
+	public void testBuildChangelistContainsOthers() throws Exception {
+		InputStream is = this.getClass().getResourceAsStream("ChangelistTest-Issue-1821.txt");
+
+		StringBuilder sb = new StringBuilder();
+		byte[] buff = new byte[10*1024*1024];
+		int read = 0;
+		while( (read = is.read(buff)) != -1 ) {
+			String line = new String(buff, 0, read);
+			sb.append(line);
+
+		}
+
+		ChangelistBuilder b = new ChangelistBuilder();
+		Changelist c = b.build(sb);
+		System.out.println("Changelist: " + c);
+	}
+
 }

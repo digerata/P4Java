@@ -35,7 +35,13 @@ public class UserTest extends PropertySupport {
 		assertEquals(getProperty("user.email"), user.getEmail());
 		assertEquals(getProperty("user.fullname"), user.getFullName());
 	}
-	
+
+	@Test
+	public void testSessionExpiredRetry() throws Exception {
+		
+	}
+
+	/*
 	@Test
 	public void testCreateUser() throws Exception {
 		
@@ -45,4 +51,5 @@ public class UserTest extends PropertySupport {
 	public void testSaveUser() throws Exception {
 		
 	}
+	*/
 }

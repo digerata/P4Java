@@ -1,3 +1,30 @@
+/*
+ *	P4Java - java integration with Perforce SCM
+ *	Copyright (C) 2007-,  Mike Wille, Tek42
+ *
+ *	This library is free software; you can redistribute it and/or
+ *	modify it under the terms of the GNU Lesser General Public
+ *	License as published by the Free Software Foundation; either
+ *	version 2.1 of the License, or (at your option) any later version.
+ *
+ *	This library is distributed in the hope that it will be useful,
+ *	but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *	MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+ *	Lesser General Public License for more details.
+ *
+ *	You should have received a copy of the GNU Lesser General Public
+ *	License along with this library; if not, write to the Free Software
+ *	Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
+ *
+ *	You can contact the author at:
+ *
+ *	Web:	http://tek42.com
+ *	Email:	mike@tek42.com
+ *	Mail:	755 W Big Beaver Road
+ *			Suite 1110
+ *			Troy, MI 48084
+ */
+
 package com.tek42.perforce;
 
 import java.util.HashMap;
@@ -7,11 +34,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.perforce.api.Env;
-import com.tek42.perforce.parse.Changes;
-import com.tek42.perforce.parse.Labels;
-import com.tek42.perforce.parse.Status;
-import com.tek42.perforce.parse.Users;
-import com.tek42.perforce.parse.Workspaces;
+import com.tek42.perforce.parse.*;
 import com.tek42.perforce.process.DefaultExecutorFactory;
 import com.tek42.perforce.process.Executor;
 import com.tek42.perforce.process.ExecutorFactory;
@@ -58,6 +81,7 @@ public class Depot {
 	private Users users;
 	private Labels labels;
 	private Status status;
+	private Groups groups;
 
 	/**
 	 * If not using this in a Dependancy Injection environment, use this method to get ahold of the depot.
@@ -185,6 +209,17 @@ public class Depot {
 		if(labels == null)
 			labels = new Labels(this);
 		return labels;
+	}
+
+	/**
+	 * Retrieves the Groups object for interacting with this depot's groups.
+	 * 
+	 * @return Groups object
+	 */
+	public Groups getGroups() {
+		if(groups == null)
+			groups = new Groups(this);
+		return groups;
 	}
 
 	/**

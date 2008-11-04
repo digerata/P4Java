@@ -1,0 +1,36 @@
+# A Perforce Group Specification.
+#
+#  Group:       The name of the group.
+#  MaxResults:  Limits the rows (or 'unlimited') any one operation can
+#               return to the client. See 'p4 help maxresults'.
+#  MaxScanRows: Limits the rows (or 'unlimited') any one operation can scan
+#               from any one database table.  See 'p4 help maxresults'.
+#  MaxLockTime: Limits the time (in milliseconds, or 'unlimited') any one
+#               operation can lock any database table when scanning data.
+#               See 'p4 help maxresults'.
+#  Timeout:     A time (in seconds) which determines how long a 'p4 login'
+#               session ticket remains valid (default is 12 hours).
+#  Subgroups:   Other groups automatically included in this group.
+#  Owners:      Users allowed to change this group without requiring super
+#               access permission.
+#  Users:       The users in the group.  One per line.
+
+Group:  tekdev
+
+MaxResults: unlimited
+
+MaxScanRows:    unlimited
+
+MaxLockTime:    unlimited
+
+Timeout:    43200
+
+Subgroups:
+
+Owners:
+	mwille
+	tuba
+
+Users:
+    anil
+    mwille

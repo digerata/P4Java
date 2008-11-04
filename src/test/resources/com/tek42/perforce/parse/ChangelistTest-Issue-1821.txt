@@ -1,0 +1,20 @@
+Change 208013 by garyd@GARYD on 2007/03/26 15:00:23
+
+        Integrate the following Changelist:
+
+        3/26/2007 2:54:07 PM - garyd:
+        Change 208010 by garyd@GARYD on 2007/03/26 14:53:42
+
+        CR66913: Missing TxnFileLoader.sh to run TxnFileLoader Utility
+
+        Adding the properties and shell script needed to kick off the
+        TxnFileLoader utility.
+
+        This has been tested by formal test but requires these properties and
+        script for operations to run it.
+
+Affected files ...
+
+... //bds/main/development/bmcagent/WEB-INF/classes/brewcustom.properties#2 integrate
+... //bds/main/development/bmcagent/runtxnfileloader.sh#1 branch
+

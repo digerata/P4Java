@@ -1,3 +1,30 @@
+/*
+ *	P4Java - java integration with Perforce SCM
+ *	Copyright (C) 2007-,  Mike Wille, Tek42
+ *
+ *	This library is free software; you can redistribute it and/or
+ *	modify it under the terms of the GNU Lesser General Public
+ *	License as published by the Free Software Foundation; either
+ *	version 2.1 of the License, or (at your option) any later version.
+ *
+ *	This library is distributed in the hope that it will be useful,
+ *	but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *	MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+ *	Lesser General Public License for more details.
+ *
+ *	You should have received a copy of the GNU Lesser General Public
+ *	License along with this library; if not, write to the Free Software
+ *	Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
+ *
+ *	You can contact the author at:
+ *
+ *	Web:	http://tek42.com
+ *	Email:	mike@tek42.com
+ *	Mail:	755 W Big Beaver Road
+ *			Suite 1110
+ *			Troy, MI 48084
+ */
+
 package com.tek42.perforce.parse;
 
 import java.util.ArrayList;
@@ -146,6 +173,7 @@ public class Changes extends AbstractPerforceTemplate {
 		// supports one.
 		int MAX_PATHS_SUPPORTED_PER_COMMAND = 1;
 
+		// Ccheck our path variable to see if we have multiple paths separated by space.  Add those to the list
 		StringTokenizer allPaths = new StringTokenizer(path, DELIM);
 		List<String> supportedPaths = new ArrayList<String>();
 		StringBuilder currentPaths = new StringBuilder("");
@@ -166,11 +194,15 @@ public class Changes extends AbstractPerforceTemplate {
 				numberOfPathsInCurrentPaths = 0;
 			}
 		}
+
+		// For each of those paths found, load the change list numbers for it.  Store them in a set.
 		Set<Integer> uniqueIds = new HashSet<Integer>();
 		for(String pathToUse : supportedPaths) {
 			List<Integer> ids = getChangeNumbersToForSinglePath(workspace, pathToUse, untilChange);
 			uniqueIds.addAll(ids);
 		}
+
+		// Sort and return
 		List<Integer> sortedIds = new ArrayList<Integer>(uniqueIds);
 		Collections.sort(sortedIds, Collections.reverseOrder());
 		return sortedIds;
@@ -186,6 +218,24 @@ public class Changes extends AbstractPerforceTemplate {
 	 * @return
 	 */
 	private List<Integer> getChangeNumbersToForSinglePath(String workspace, String path, int untilChange) throws PerforceException {
+		List<Integer> numbers = new ArrayList<Integer>();
+		recurseGetChangeNumbersTo(workspace, path, untilChange, numbers);
+		return numbers;
+	}
+
+	/**
+	 * Internal method that will handle a Perforce MaxResults when looking for changelists that return too many results.  If
+	 * the error is encountered, it will call p4 dirs path/* to find a list of top level directories beneath the desired path.
+	 * It will then iterate over that list and call itself on each directory.  This gets beyond the MaxResults
+	 * issue.  See: https://hudson.dev.java.net/issues/show_bug.cgi?id=1939
+	 *
+	 * @param workspace
+	 * @param path
+	 * @param untilChange
+	 * @param numbers
+	 * @throws PerforceException
+	 */
+	private void recurseGetChangeNumbersTo(String workspace, String path, int untilChange, List<Integer> numbers) throws PerforceException {
 		path = normalizePath(path);
 
 		List<String> cmdList = new ArrayList<String>();
@@ -194,9 +244,8 @@ public class Changes extends AbstractPerforceTemplate {
 		addCommandWorkspace(cmdList, workspace);
 		addCommand(cmdList, path);
 
-		List<Integer> ids = new ArrayList<Integer>();
 		String lastChange;
-		OUTER: while(true) {
+		while(true) {
 			// System.out.println("Looping: " + counter++);
 			StringBuilder response;
 			try {
@@ -205,9 +254,16 @@ public class Changes extends AbstractPerforceTemplate {
 				// less change lists in the history then what was specified, we will hit this
 				// exception
 				response = getPerforceResponse(cmdList.toArray(new String[cmdList.size()]));
+				if(hitMax(response)) {
+					String newPaths[] = getTopLevelDirectoriesForPath(workspace, path);
+					for(String newPath : newPaths) {
+						recurseGetChangeNumbersTo(workspace, newPath, untilChange, numbers);
+					}
+					break;
+				}
 			} catch(PerforceException e) {
 				if(e.getMessage().startsWith("No output for"))
-					break OUTER;
+					break;
 				throw e;
 			}
 			List<String> temp = parseList(response, 1);
@@ -215,9 +271,9 @@ public class Changes extends AbstractPerforceTemplate {
 				break;
 			for(String num : temp) {
 				if(new Integer(num) >= untilChange)
-					ids.add(new Integer(num));
+					numbers.add(new Integer(num));
 				else
-					break OUTER;
+					break;
 			}
 			lastChange = temp.get(temp.size() - 1);
 			int next = new Integer(lastChange) - 1;
@@ -226,7 +282,31 @@ public class Changes extends AbstractPerforceTemplate {
 			addCommandWorkspace(cmdList, workspace);
 			addCommand(cmdList, path + "@" + next);
 		}
-		return ids;
+	}
+
+	/**
+	 * Executes: p4 dirs -C workspacename //depot/path/*
+	 * to find a list of top level directories beneath the path.
+	 *
+	 * @param workspace	The optional workspace to limit search to.  Null if not used.
+	 * @param path	The path to search
+	 * @return	A string array of paths.
+	 * @throws PerforceException	If there are problems communicating with perforce.
+	 */
+	private String[] getTopLevelDirectoriesForPath(String workspace, String path) throws PerforceException {
+
+		if(path.endsWith("..."))
+			path = path.replaceAll("\\.\\.\\.", "\\*");
+
+		List<String> cmdList = new ArrayList<String>();
+		addCommand(cmdList, "p4", "dirs");
+		addCommandWorkspace(cmdList, workspace);
+		addCommand(cmdList, path);
+
+		StringBuilder response = getPerforceResponse(cmdList.toArray(new String[cmdList.size()]));
+		List<String> list = parseList(response, 0);
+
+		return list.toArray(new String[list.size()]);
 	}
 
 	/**
