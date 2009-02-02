@@ -1,3 +1,30 @@
+/*
+ *	P4Java - java integration with Perforce SCM
+ *	Copyright (C) 2007-,  Mike Wille, Tek42
+ *
+ *	This library is free software; you can redistribute it and/or
+ *	modify it under the terms of the GNU Lesser General Public
+ *	License as published by the Free Software Foundation; either
+ *	version 2.1 of the License, or (at your option) any later version.
+ *
+ *	This library is distributed in the hope that it will be useful,
+ *	but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *	MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+ *	Lesser General Public License for more details.
+ *
+ *	You should have received a copy of the GNU Lesser General Public
+ *	License along with this library; if not, write to the Free Software
+ *	Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
+ *
+ *	You can contact the author at:
+ *
+ *	Web:	http://tek42.com
+ *	Email:	mike@tek42.com
+ *	Mail:	755 W Big Beaver Road
+ *			Suite 1110
+ *			Troy, MI 48084
+ */
+
 package com.tek42.perforce.parse;
 
 import java.io.BufferedReader;
@@ -23,6 +50,17 @@ import com.tek42.perforce.process.Executor;
 public abstract class AbstractPerforceTemplate {
 	Depot depot;
 	Logger logger;
+    final String errors[] = new String[] {
+        "Connect to server failed; check $P4PORT",
+		"Perforce password (P4PASSWD) invalid or unset.",
+		"Password not allowed at this server security level, use 'p4 login'",
+		"Can't create a new user - over license quota.",
+		"Client '*' can only be used from host '*'",
+		"Access for user '",
+		"Your session has expired, please login again."
+	};
+
+	final String maxError = "Request too large";
 
 	public AbstractPerforceTemplate(Depot depot) {
 		this.depot = depot;
@@ -49,6 +87,17 @@ public abstract class AbstractPerforceTemplate {
 		}
 		return list;
 
+	}
+
+	/**
+	 * Check to see if the perforce request resulted in a "too many results" error.  If so, special handling needs
+	 * to happen.
+	 *
+	 * @param response The response from perforce
+	 * @return	True if the limit was reached, false otherwise.
+	 */
+	protected boolean hitMax(StringBuilder response) {
+		return response.toString().startsWith(maxError);
 	}
 
 	/**
@@ -85,71 +134,96 @@ public abstract class AbstractPerforceTemplate {
 	 */
 	@SuppressWarnings("unchecked")
 	protected void saveToPerforce(Object object, Builder builder) throws PerforceException {
-		Executor p4 = depot.getExecFactory().newExecutor();
-		try {
-			String cmds[] = getExtraParams(builder.getSaveCmd());
+		boolean loop = false;
+		boolean attemptLogin = true;
 
-			// for exception reporting...
-			StringBuilder debugCmd = new StringBuilder();
-			for(String cm : cmds) {
-				debugCmd.append(cm + " ");
-			}
+		StringBuilder response = new StringBuilder();
+		do {
+			int mesgIndex = -1, i, count = 0;
+			Executor p4 = depot.getExecFactory().newExecutor();
+			String debugCmd = "";
+			try {
+				String cmds[] = getExtraParams(builder.getSaveCmd());
 
-			// back to our regularly scheduled programming...
-			p4.exec(cmds);
-			BufferedReader reader = p4.getReader();
-			BufferedWriter writer = p4.getWriter();
-			final StringBuilder log = new StringBuilder();
-			Writer fwriter = new FilterWriter(writer) {
-				public void write(String str) throws IOException {
-					log.append(str);
-					out.write(str);
+				// for exception reporting...
+				for(String cm : cmds) {
+					debugCmd += cm + " ";
 				}
-			};
-			builder.save(object, fwriter);
-			fwriter.flush();
-			fwriter.close();
 
-			String line;
-			String error = "";
-			String info = "";
-			int exitCode = 0;
-			// Note: we do not try a p4 login here. There is a danger that we could
-			// potentially not be authenticated yet. However, I believe that in normal
-			// operation you would have already received a ticket via getPerforceResponse()
-			while((line = reader.readLine()) != null) {
-				logger.debug("LineIn -> " + line);
-				if(line.startsWith("error")) {
-					if(!line.trim().equals("") && (line.indexOf("up-to-date") < 0) && (line.indexOf("no file(s) to resolve") < 0)) {
-						error += line.substring(6);
+				// back to our regularly scheduled programming...
+				p4.exec(cmds);
+				BufferedReader reader = p4.getReader();
+				BufferedWriter writer = p4.getWriter();
+				final StringBuilder log = new StringBuilder();
+				Writer fwriter = new FilterWriter(writer) {
+					public void write(String str) throws IOException {
+						log.append(str);
+						out.write(str);
+					}
+				};
+				builder.save(object, fwriter);
+				fwriter.flush();
+				fwriter.close();
+
+				String line;
+				String error = "";
+				String info = "";
+				int exitCode = 0;
+
+				while((line = reader.readLine()) != null) {
+					logger.debug("LineIn -> " + line);
+
+					// Check for authentication errors...
+					for(i = 0; i < errors.length; i++) {
+						if(line.indexOf(errors[i]) != -1)
+							mesgIndex = i;
+
 					}
 
-				} else if(line.startsWith("exit")) {
-					exitCode = new Integer(line.substring(line.indexOf(" ") + 1, line.length())).intValue();
+					if(line.startsWith("error")) {
+						if(!line.trim().equals("") && (line.indexOf("up-to-date") < 0) && (line.indexOf("no file(s) to resolve") < 0)) {
+							error += line.substring(6);
+						}
 
-				} else {
-					if(line.indexOf(":") > -1)
-						info += line.substring(line.indexOf(":"));
-					else
-						info += line;
+					} else if(line.startsWith("exit")) {
+						exitCode = new Integer(line.substring(line.indexOf(" ") + 1, line.length())).intValue();
+
+					} else {
+						if(line.indexOf(":") > -1)
+							info += line.substring(line.indexOf(":"));
+						else
+							info += line;
+					}
 				}
+				reader.close();
+
+				loop = false;
+				// If we failed to execute because of an authentication issue, try a p4 login.
+				if(attemptLogin && (mesgIndex == 1 || mesgIndex == 2 || mesgIndex == 6)) {
+					// password is unset means that perforce isn't using the environment var P4PASSWD
+					// Instead it is using tickets. We must attempt to login via p4 login, then
+					// retry this cmd.
+					p4.close();
+					login();
+					loop = true;
+					attemptLogin = false;
+					continue;
+				}
+				
+				if(exitCode != 0) {
+					if(!error.equals(""))
+						throw new PerforceException(error + "\nFor Command: " + debugCmd + "\nWith Data:\n===================\n" + log.toString() + "===================\n");
+					throw new PerforceException(info);
+				}
+
+				logger.info(info);
+
+			} catch(IOException e) {
+				throw new PerforceException("Failed to open connection to perforce", e);
+			} finally {
+				p4.close();
 			}
-			reader.close();
-
-			if(exitCode != 0) {
-				if(!error.equals(""))
-					throw new PerforceException(error + "\nFor Command: " + debugCmd + "\nWith Data:\n===================\n"
-							+ log.toString() + "===================\n");
-				throw new PerforceException(info);
-			}
-
-			logger.info(info);
-
-		} catch(IOException e) {
-			throw new PerforceException("Failed to open connection to perforce", e);
-		} finally {
-			p4.close();
-		}
+		} while(loop);
 	}
 
 	/**
@@ -160,9 +234,7 @@ public abstract class AbstractPerforceTemplate {
 	 * @throws PerforceException
 	 */
 	protected StringBuilder getPerforceResponse(String cmd[]) throws PerforceException {
-		String[] mesg = { "Connect to server failed; check $P4PORT", "Perforce password (P4PASSWD) invalid or unset.",
-				"Password not allowed at this server security level, use 'p4 login'", "Can't create a new user - over license quota.",
-				"Access for user '" };
+		// TODO: Create a way to wildcard portions of the error checking.  Add method to check for these errors.
 		boolean loop = false;
 		boolean attemptLogin = true;
 
@@ -187,15 +259,15 @@ public abstract class AbstractPerforceTemplate {
 				response = new StringBuilder();
 				while((line = reader.readLine()) != null) {
 					count++;
-					for(i = 0; i < mesg.length; i++) {
-						if(line.indexOf(mesg[i]) != -1)
+					for(i = 0; i < errors.length; i++) {
+						if(line.indexOf(errors[i]) != -1)
 							mesgIndex = i;
 					}
 					response.append(line + "\n");
 				}
 				loop = false;
 				// If we failed to execute because of an authentication issue, try a p4 login.
-				if(attemptLogin && (mesgIndex == 1 || mesgIndex == 2)) {
+				if(attemptLogin && (mesgIndex == 1 || mesgIndex == 2 || mesgIndex == 6)) {
 					// password is unset means that perforce isn't using the environment var P4PASSWD
 					// Instead it is using tickets. We must attempt to login via p4 login, then
 					// retry this cmd.
@@ -210,7 +282,7 @@ public abstract class AbstractPerforceTemplate {
 				if(mesgIndex == 4)
 					throw new PerforceException("Access for user '" + depot.getUser() + "' has not been enabled by 'p4 protect'");
 				if(mesgIndex != -1)
-					throw new PerforceException(mesg[mesgIndex]);
+					throw new PerforceException(errors[mesgIndex]);
 				if(count == 0)
 					throw new PerforceException("No output for: " + debugCmd);
 
