@@ -104,6 +104,14 @@ public abstract class AbstractFormBuilder<T> implements Builder<T> {
 	}
 
 	/**
+	 * Default implementation for most Perforce operations is to use stdin.  This will return true.
+	 * @return	True always
+	 */
+	public boolean requiresStandardInput() {
+		return true;
+	}
+
+	/**
 	 * Should return a new object set with the data from fields.
 	 * 
 	 * @param fields

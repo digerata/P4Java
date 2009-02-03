@@ -77,7 +77,7 @@ public class LabelBuilder extends AbstractFormBuilder<Label> {
 	 * 
 	 * @see com.tek42.perforce.parse.Builder#getSaveCmd()
 	 */
-	public String[] getSaveCmd() {
+	public String[] getSaveCmd(Label obj) {
 		return new String[] { "p4", "-s", "label", "-i" };
 	}
 

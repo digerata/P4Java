@@ -175,8 +175,12 @@ public class ChangelistBuilder implements Builder<Changelist> {
 		return change;
 	}
 
-	public String[] getSaveCmd() {
+	public String[] getSaveCmd(Changelist obj) {
 		return new String[] { "p4", "change", "-i" };
+	}
+
+	public boolean requiresStandardInput() {
+		return true;
 	}
 
 	/*

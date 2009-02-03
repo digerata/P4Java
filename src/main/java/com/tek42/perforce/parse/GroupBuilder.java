@@ -62,7 +62,7 @@ public class GroupBuilder extends AbstractFormBuilder<Group> {
 		return new String[] { "p4", "group", "-o", id };
 	}
 
-	public String[] getSaveCmd() {
+	public String[] getSaveCmd(Group obj) {
 		return new String[] { "p4", "-s", "group", "-i" };
 	}
 

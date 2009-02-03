@@ -71,7 +71,7 @@ public class UserBuilder extends AbstractFormBuilder<User> {
 	 * 
 	 * @see com.tek42.perforce.parse.Builder#getSaveCmd()
 	 */
-	public String[] getSaveCmd() {
+	public String[] getSaveCmd(User obj) {
 		// TODO Auto-generated method stub
 		return null;
 	}

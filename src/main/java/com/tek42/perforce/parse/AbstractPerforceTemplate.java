@@ -71,9 +71,9 @@ public abstract class AbstractPerforceTemplate {
 	 * Parses lines of formatted text for a list of values. Tokenizes each line into columns and adds the column
 	 * specified by index to the list.
 	 * 
-	 * @param response
-	 * @param index
-	 * @return
+	 * @param response	The response from perforce to parse
+	 * @param index		The column index to add to the list
+	 * @return	A List of strings parsed from the response
 	 */
 	protected List<String> parseList(StringBuilder response, int index) {
 		StringTokenizer lines = new StringTokenizer(response.toString(), "\n\r");
@@ -128,22 +128,22 @@ public abstract class AbstractPerforceTemplate {
 	/**
 	 * Handles the IO for opening a process, writing to it, flushing, closing, and then handling any errors.
 	 * 
-	 * @param object
-	 * @param builder
-	 * @throws PerforceException
+	 * @param object	The perforce object to save
+	 * @param builder	The builder responsible for saving the object
+	 * @throws PerforceException	If there is any errors thrown from perforce
 	 */
 	@SuppressWarnings("unchecked")
 	protected void saveToPerforce(Object object, Builder builder) throws PerforceException {
 		boolean loop = false;
 		boolean attemptLogin = true;
 
-		StringBuilder response = new StringBuilder();
+		//StringBuilder response = new StringBuilder();
 		do {
-			int mesgIndex = -1, i, count = 0;
+			int mesgIndex = -1, i;//, count = 0;
 			Executor p4 = depot.getExecFactory().newExecutor();
 			String debugCmd = "";
 			try {
-				String cmds[] = getExtraParams(builder.getSaveCmd());
+				String cmds[] = getExtraParams(builder.getSaveCmd(object));
 
 				// for exception reporting...
 				for(String cm : cmds) {
@@ -153,17 +153,23 @@ public abstract class AbstractPerforceTemplate {
 				// back to our regularly scheduled programming...
 				p4.exec(cmds);
 				BufferedReader reader = p4.getReader();
-				BufferedWriter writer = p4.getWriter();
+
+				// Maintain a log of what was sent to p4 on std input
 				final StringBuilder log = new StringBuilder();
-				Writer fwriter = new FilterWriter(writer) {
-					public void write(String str) throws IOException {
-						log.append(str);
-						out.write(str);
-					}
-				};
-				builder.save(object, fwriter);
-				fwriter.flush();
-				fwriter.close();
+
+				// Conditional use of std input for saving the perforce entity
+				if(builder.requiresStandardInput()) {
+					BufferedWriter writer = p4.getWriter();
+					Writer fwriter = new FilterWriter(writer) {
+						public void write(String str) throws IOException {
+							log.append(str);
+							out.write(str);
+						}
+					};
+					builder.save(object, fwriter);
+					fwriter.flush();
+					fwriter.close();
+				}
 
 				String line;
 				String error = "";
@@ -186,7 +192,7 @@ public abstract class AbstractPerforceTemplate {
 						}
 
 					} else if(line.startsWith("exit")) {
-						exitCode = new Integer(line.substring(line.indexOf(" ") + 1, line.length())).intValue();
+						exitCode = Integer.parseInt(line.substring(line.indexOf(" ") + 1, line.length()));
 
 					} else {
 						if(line.indexOf(":") > -1)
@@ -229,9 +235,9 @@ public abstract class AbstractPerforceTemplate {
 	/**
 	 * Executes a perforce command and returns the output as a StringBuilder.
 	 * 
-	 * @param cmd
-	 * @return
-	 * @throws PerforceException
+	 * @param cmd	The perforce commands to execute.  Each command and argument is it's own array element
+	 * @return	The response from perforce as a stringbuilder
+	 * @throws PerforceException	If perforce throws any errors
 	 */
 	protected StringBuilder getPerforceResponse(String cmd[]) throws PerforceException {
 		// TODO: Create a way to wildcard portions of the error checking.  Add method to check for these errors.
@@ -263,7 +269,8 @@ public abstract class AbstractPerforceTemplate {
 						if(line.indexOf(errors[i]) != -1)
 							mesgIndex = i;
 					}
-					response.append(line + "\n");
+					response.append(line);
+					response.append("\n");
 				}
 				loop = false;
 				// If we failed to execute because of an authentication issue, try a p4 login.
@@ -302,7 +309,7 @@ public abstract class AbstractPerforceTemplate {
 	 * <p>
 	 * Unfortunately, this likely doesn't work on windows.
 	 * 
-	 * @throws PerforceException
+	 * @throws PerforceException	If perforce throws any errors
 	 */
 	protected void login() throws PerforceException {
 		// Unfortunately, the simple way of doing this: echo password | p4 login
@@ -317,6 +324,7 @@ public abstract class AbstractPerforceTemplate {
 			try {
 				Thread.sleep(250);
 			} catch(InterruptedException e) {
+				// nothing to do
 			}
 			try {
 				login.getWriter().write(depot.getPassword() + "\n");
