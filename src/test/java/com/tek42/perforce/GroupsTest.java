@@ -63,8 +63,11 @@ public class GroupsTest extends PropertySupport {
 		Group group = new Group();
 		group.setName(getProperty("group.new.name"));
 		List<String> users = new ArrayList<String>();
-		users.add(getProperty("group.new.user"));
+		users.add(getProperty("group.new.user").trim());
 		group.setUsers(users);
+		List<String> owners = new ArrayList<String>();
+		owners.add(getProperty("p4.user").trim());
+		group.setOwners(owners);
 		group.setTimeout(Long.parseLong(getProperty("group.new.timeout")));
 
 		Group copy = group;

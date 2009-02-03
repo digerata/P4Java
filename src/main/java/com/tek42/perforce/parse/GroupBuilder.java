@@ -67,6 +67,10 @@ public class GroupBuilder extends AbstractFormBuilder<Group> {
 	}
 
 	public void save(Group group, Writer out) throws PerforceException {
+		// A bit of validation to make sure we are correct.  Perforce does NOT freaking tell us about this during the save...
+		if(group.getOwnersAsString().equals("")) {
+			throw new IllegalArgumentException("Group owner is a required field.");
+		}
 		/* form looks like:
 			Group:  tekdev
 

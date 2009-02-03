@@ -33,7 +33,7 @@ public class WorkspaceTest extends PropertySupport {
 	}
 
 	/**
-	 * Test method for {@link com.tek42.perforce.Depot#getWorkspace(java.lang.String)}.
+	 * Test method for {@link com.tek42.perforce.parse.Workspaces#getWorkspace(String)}.
 	 */
 	@Test
 	public void testGetWorkspace() throws Exception {
@@ -112,7 +112,7 @@ public class WorkspaceTest extends PropertySupport {
 		System.out.println(sb);
 		File test = new File(dir.getAbsolutePath() + "/" + getProjectFolder(getProperty("changelist.project")) + "/project-file.txt");
 		System.out.println("Checking for file: " + test.getAbsolutePath());
-		assertTrue(test.exists());
+		assertTrue("Workspace sync failed, file does not exist.", test.exists());
 	}
 	
 	/**

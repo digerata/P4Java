@@ -222,6 +222,7 @@ public abstract class AbstractPerforceTemplate {
 					throw new PerforceException(info);
 				}
 
+				logger.debug("Wrote to " + debugCmd + ":\n" + log.toString());
 				logger.info(info);
 
 			} catch(IOException e) {
