@@ -82,7 +82,7 @@ public class Depot {
 	private Labels labels;
 	private Status status;
 	private Groups groups;
-
+	private Counters counters;
 	/**
 	 * If not using this in a Dependancy Injection environment, use this method to get ahold of the depot.
 	 * 
@@ -222,7 +222,7 @@ public class Depot {
 		return groups;
 	}
 
-	/**
+	/**	 * Retrieves the {@link Counters} object for interacting with this depot's counters.	 * 	 * @return Counters object	 */	public Counters getCounters() {		if(counters == null)			counters = new Counters(this);		return counters;	}	/**
 	 * Retrieves the status object for interacting with the depot's status.
 	 * <p>
 	 * E.g., depot.getStatus().isValid() for checking if the settings are correct.
