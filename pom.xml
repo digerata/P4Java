@@ -5,9 +5,9 @@
 	<groupId>com.tek42.perforce</groupId>
 	<artifactId>p4java</artifactId>
 	<packaging>jar</packaging>
-	<version>0.7.6-SNAPSHOT</version>
+	<version>0.7.6</version>
 	<name>P4Java</name>
-	<url>http://tek42.com/perforce</url>
+	<url>http://tek42.com/p4java</url>
 	<inceptionYear>2007</inceptionYear>
 	<description>
 		Open Source Java Library to interact with Perforce SCM Repositories.
