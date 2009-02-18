@@ -50,7 +50,8 @@ public class Changelist implements java.io.Serializable {
 	String description;
 	List<FileEntry> files;
 	List<JobEntry> jobs;
-
+	boolean pending;
+	
 	public Changelist() {
 		files = new ArrayList<FileEntry>(0);
 		jobs = new ArrayList<JobEntry>(0);
@@ -310,5 +311,19 @@ public class Changelist implements java.io.Serializable {
 	 */
 	public void setJobs(List<JobEntry> jobs) {
 		this.jobs = jobs;
+	}
+
+	/**
+	 * @return <code>true</code> if this is a pending changelist
+	 */
+	public boolean isPending() {
+		return pending;
+	}
+
+	/**
+	 * @param pending
+	 */
+	public void setPending(boolean pending) {
+		this.pending = pending;
 	}
 }

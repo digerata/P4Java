@@ -133,11 +133,11 @@ public abstract class AbstractPerforceTemplate {
 	 * @throws PerforceException	If there is any errors thrown from perforce
 	 */
 	@SuppressWarnings("unchecked")
-	protected void saveToPerforce(Object object, Builder builder) throws PerforceException {
+	protected StringBuilder saveToPerforce(Object object, Builder builder) throws PerforceException {
 		boolean loop = false;
 		boolean attemptLogin = true;
 
-		//StringBuilder response = new StringBuilder();
+		StringBuilder response = new StringBuilder();
 		do {
 			int mesgIndex = -1, i;//, count = 0;
 			Executor p4 = depot.getExecFactory().newExecutor();
@@ -173,7 +173,6 @@ public abstract class AbstractPerforceTemplate {
 
 				String line;
 				String error = "";
-				String info = "";
 				int exitCode = 0;
 
 				while((line = reader.readLine()) != null) {
@@ -196,9 +195,9 @@ public abstract class AbstractPerforceTemplate {
 
 					} else {
 						if(line.indexOf(":") > -1)
-							info += line.substring(line.indexOf(":"));
+							response.append(line.substring(line.indexOf(":")));
 						else
-							info += line;
+							response.append(line);
 					}
 				}
 				reader.close();
@@ -219,11 +218,11 @@ public abstract class AbstractPerforceTemplate {
 				if(exitCode != 0) {
 					if(!error.equals(""))
 						throw new PerforceException(error + "\nFor Command: " + debugCmd + "\nWith Data:\n===================\n" + log.toString() + "===================\n");
-					throw new PerforceException(info);
+					throw new PerforceException(response.toString());
 				}
 
 				logger.debug("Wrote to " + debugCmd + ":\n" + log.toString());
-				logger.info(info);
+				logger.info(response.toString());
 
 			} catch(IOException e) {
 				throw new PerforceException("Failed to open connection to perforce", e);
@@ -231,6 +230,8 @@ public abstract class AbstractPerforceTemplate {
 				p4.close();
 			}
 		} while(loop);
+		
+		return response;
 	}
 
 	/**

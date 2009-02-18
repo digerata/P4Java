@@ -24,16 +24,16 @@
  *			Suite 1110
  *			Troy, MI 48084
  */
-
 package com.tek42.perforce.parse;
 
+import java.io.IOException;
 import java.io.Writer;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.GregorianCalendar;
 import java.util.List;
-import java.util.StringTokenizer;
 import java.util.Locale;
+import java.util.StringTokenizer;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -55,7 +55,6 @@ public class ChangelistBuilder implements Builder<Changelist> {
 
 	/*
 	 * (non-Javadoc)
-	 * 
 	 * @see com.tek42.perforce.parse.Builder#build(java.lang.StringBuilder)
 	 */
 	public Changelist build(StringBuilder sb) throws PerforceException {
@@ -86,6 +85,10 @@ public class ChangelistBuilder implements Builder<Changelist> {
 
 					change.setDate(parseDate(date + " " + time));
 
+					if (details.hasMoreTokens() && details.nextToken().equals("*pending*")) {
+						change.setPending(true);
+					}
+					
 					// the lines immediately following is the description
 					StringBuilder desc = new StringBuilder();
 					line = lines.nextToken();
@@ -185,11 +188,16 @@ public class ChangelistBuilder implements Builder<Changelist> {
 
 	/*
 	 * (non-Javadoc)
-	 * 
 	 * @see com.tek42.perforce.parse.Builder#save(java.lang.Object)
 	 */
 	public void save(Changelist obj, Writer out) throws PerforceException {
-		throw new UnsupportedOperationException("This is not implemented.");
+		try {
+			out.write("Change: new \n");
+			out.write("Description:\n\t" + obj.getDescription() + "\n");
+			out.write("\n");
+		} catch(IOException e) {
+			throw new PerforceException("Failed to save changelist", e);
+		}
 	}
 
 	/**
@@ -225,5 +233,4 @@ public class ChangelistBuilder implements Builder<Changelist> {
 
 		return cal.getTime();
 	}
-
 }

@@ -24,7 +24,6 @@
  *			Suite 1110
  *			Troy, MI 48084
  */
-
 package com.tek42.perforce.parse;
 
 import java.util.ArrayList;
@@ -107,7 +106,6 @@ public class Changes extends AbstractPerforceTemplate {
 	 * <pre>
 	 * depot.getChangeNumbers(&quot;//project/...&quot;, -1, 1)
 	 * </pre>
-	 * 
 	 * <p>
 	 * Note: this method follows perforce in that it starts at the highest number and works backwards. So this might not
 	 * be what you want. (It certainly isn't for Hudson)
@@ -173,7 +171,7 @@ public class Changes extends AbstractPerforceTemplate {
 		// supports one.
 		int MAX_PATHS_SUPPORTED_PER_COMMAND = 1;
 
-		// Ccheck our path variable to see if we have multiple paths separated by space.  Add those to the list
+		// Ccheck our path variable to see if we have multiple paths separated by space. Add those to the list
 		StringTokenizer allPaths = new StringTokenizer(path, DELIM);
 		List<String> supportedPaths = new ArrayList<String>();
 		StringBuilder currentPaths = new StringBuilder("");
@@ -195,7 +193,7 @@ public class Changes extends AbstractPerforceTemplate {
 			}
 		}
 
-		// For each of those paths found, load the change list numbers for it.  Store them in a set.
+		// For each of those paths found, load the change list numbers for it. Store them in a set.
 		Set<Integer> uniqueIds = new HashSet<Integer>();
 		for(String pathToUse : supportedPaths) {
 			List<Integer> ids = getChangeNumbersToForSinglePath(workspace, pathToUse, untilChange);
@@ -224,11 +222,11 @@ public class Changes extends AbstractPerforceTemplate {
 	}
 
 	/**
-	 * Internal method that will handle a Perforce MaxResults when looking for changelists that return too many results.  If
-	 * the error is encountered, it will call p4 dirs path/* to find a list of top level directories beneath the desired path.
-	 * It will then iterate over that list and call itself on each directory.  This gets beyond the MaxResults
-	 * issue.  See: https://hudson.dev.java.net/issues/show_bug.cgi?id=1939
-	 *
+	 * Internal method that will handle a Perforce MaxResults when looking for changelists that return too many results.
+	 * If the error is encountered, it will call p4 dirs path/* to find a list of top level directories beneath the
+	 * desired path. It will then iterate over that list and call itself on each directory. This gets beyond the
+	 * MaxResults issue. See: https://hudson.dev.java.net/issues/show_bug.cgi?id=1939
+	 * 
 	 * @param workspace
 	 * @param path
 	 * @param untilChange
@@ -285,13 +283,15 @@ public class Changes extends AbstractPerforceTemplate {
 	}
 
 	/**
-	 * Executes: p4 dirs -C workspacename //depot/path/*
-	 * to find a list of top level directories beneath the path.
-	 *
-	 * @param workspace	The optional workspace to limit search to.  Null if not used.
-	 * @param path	The path to search
-	 * @return	A string array of paths.
-	 * @throws PerforceException	If there are problems communicating with perforce.
+	 * Executes: p4 dirs -C workspacename //depot/path/* to find a list of top level directories beneath the path.
+	 * 
+	 * @param workspace
+	 *            The optional workspace to limit search to. Null if not used.
+	 * @param path
+	 *            The path to search
+	 * @return A string array of paths.
+	 * @throws PerforceException
+	 *             If there are problems communicating with perforce.
 	 */
 	private String[] getTopLevelDirectoriesForPath(String workspace, String path) throws PerforceException {
 
@@ -361,5 +361,24 @@ public class Changes extends AbstractPerforceTemplate {
 			changes.add(getChangelist(id));
 		}
 		return changes;
+	}
+
+	/**
+	 * Creates a new changelist.
+	 * 
+	 * @param changelist
+	 * @throws PerforceException
+	 */
+	public void createChangelist(Changelist changelist) throws PerforceException {
+		StringBuilder builder = saveToPerforce(changelist, new ChangelistBuilder());
+		// Response is "Changelist 1234 created."
+		String changelistNumber = builder.substring(builder.indexOf(" ") + 1, builder.lastIndexOf(" "));
+		// get the changelist and populate rest of the fields
+		Changelist savedChangelist = getChangelist(Integer.parseInt(changelistNumber));
+		changelist.setChangeNumber(savedChangelist.getChangeNumber());
+		changelist.setDate(savedChangelist.getDate());
+		changelist.setUser(savedChangelist.getUser());
+		changelist.setWorkspace(savedChangelist.getWorkspace());
+		changelist.setPending(savedChangelist.isPending());
 	}
 }
