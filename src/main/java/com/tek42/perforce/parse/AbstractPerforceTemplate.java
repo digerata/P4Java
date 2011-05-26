@@ -337,37 +337,32 @@ public abstract class AbstractPerforceTemplate {
 		} else { // for everything not windows...
 			Executor login = depot.getExecFactory().newExecutor();
 			// The -p parameter outputs the ticket to stdout.
-			login.exec(new String[] { "/bin/sh", "-c", "echo \"" + depot.getPassword() + "\" | p4 login -p" });
-			BufferedReader reader = login.getReader();
-			String line;
+			final String[] args = {"/bin/sh", "-c", depot.getExecutable() + " login -p"};
+			logger.info("Running " + Arrays.toString(args));
+			login.exec(null, args);
 			String ticket = null;
 			try {
+				login.getWriter().write(depot.getPassword()==null ? "" : depot.getPassword());
+				login.getWriter().newLine();
+				login.getWriter().flush();
+				BufferedReader reader = login.getReader();
+				String line;
+				
 				// The last line output from p4 login will be the ticket
 				while((line = reader.readLine()) != null) {
 					ticket = line;
 				}
-				
-				// Strange error under hudson's execution of unit tests.  It appears
-				// that the environment is not setup correctly from within hudson.  The sh shell
-				// cannot find the p4 executable.  So we'll try again with a hard coded path.
-				// Though, I don't believe this problem exists outside of the build environment, 
-				// and wouldn't normally worry, I still want to be able to test security level 3
-				// from the automated build...
-				if(ticket != null && ticket.equals("/bin/sh: p4: command not found")) {
-					login.close();
-					login.exec(new String[] { "/bin/sh", "-c", "echo \"" + depot.getPassword() + "\" | /usr/bin/p4 login -p" });
-					reader = login.getReader();
-					while((line = reader.readLine()) != null) {
-						ticket = line;
-					}
-				}
-
+			
 			} catch(IOException e) {
 				throw new PerforceException("Unable to login via p4 login due to IOException: " + e.getMessage());
 			}
 			// if we obtained a ticket, save it for later use. Our environment setup by Depot can't usually
 			// see the .p4tickets file.
 			if(ticket != null) {
+				ticket = ticket.trim();
+				if(ticket.contains(" ")) {
+					throw new PerforceException("Failed to login: " + ticket);
+				}
 				logger.warn("Using p4 issued ticket.");
 				depot.setP4Ticket(ticket);
 			}
